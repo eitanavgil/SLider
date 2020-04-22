@@ -1,25 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment } from "react";
+import "./App.css";
+import Board from "./components/boards/Board/Board";
 
+const board: number[][] = [
+  [0, 0, 1, 1],
+  [2, 2, 9, 3],
+  [4, 4, 5, 5],
+];
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Fragment>
+      <h2>Play Board</h2>
+      <div className="App">
+        <Board boardData={board} interactive={true}></Board>
+      </div>
+      <hr></hr>
+      <h2>Target Board</h2>
+      <div className="App">
+        <Board boardData={board}></Board>
+      </div>
+    </Fragment>
   );
 }
 
