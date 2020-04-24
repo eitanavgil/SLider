@@ -1,11 +1,12 @@
 import React, {Fragment} from "react";
 import "./App.css";
 import Board from "./components/boards/Board/Board";
+import {cloneArray} from "./utils/Utils";
 
 const board: number[][] = [
-    [0, 0, 1, 1],
-    [2, 2, 9, 3],
-    [4, 4, 5, 5],
+    [0, 2, 5, 1, 3],
+    [2, 5, 9, 3, 4],
+    [2, 4, 1, 5, 5],
 ];
 
 export interface boardItem {

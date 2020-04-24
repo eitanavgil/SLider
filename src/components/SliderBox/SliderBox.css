@@ -4,7 +4,7 @@
   display: inline-block;
 }
 .c0 {
-  background-color: purple;
+  background-color: darkslategrey;
 }
 .c1 {
   background-color: yellow;
@@ -22,5 +22,5 @@
   background-color: red;
 }
 .c9 {
-  background-color: darkslategrey;
+  background-color: white;
 }

@@ -30,3 +30,10 @@ export const convertToBoardItems = (data: [][], index: number): boardItem[][] =>
     })
     return data
 }
+
+export enum directions {
+UP ="UP",
+DOWN ="DOWN",
+LEFT ="LEFT",
+RIGHT ="RIGHT",
+}
