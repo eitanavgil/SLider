@@ -1,4 +1,4 @@
-import {boardItem} from "../App";
+import {boardItem} from "../components/boards/Board/Board";
 
 export const shuffle: Function = (array: []) => {
     return array.sort(() => Math.random() - 0.5);
@@ -16,8 +16,20 @@ export const shuffleArray = (arrData: any[]) => {
     return shuffle(cloneArray(arrData as []));
 };
 
-export const cloneArray = (arrData: []) => {
-    return [...arrData];
+export const cloneArray = (arr: []) => {
+    let i, copy;
+    if (Array.isArray(arr)) {
+        copy = arr.slice(0);
+        for (i = 0; i < copy.length; i++) {
+            // @ts-ignore
+            copy[i] = cloneArray(copy[i]);
+        }
+        return copy;
+    } else if (typeof arr === 'object') {
+        throw 'Cannot clone array containing an object!';
+    } else {
+        return arr;
+    }
 }
 
 export const convertToBoardItems = (data: [][], index: number): boardItem[][] => {
@@ -32,8 +44,9 @@ export const convertToBoardItems = (data: [][], index: number): boardItem[][] =>
 }
 
 export enum directions {
-UP ="UP",
-DOWN ="DOWN",
-LEFT ="LEFT",
-RIGHT ="RIGHT",
+    UP = "UP",
+    DOWN = "DOWN",
+    LEFT = "LEFT",
+    RIGHT = "RIGHT",
 }
+

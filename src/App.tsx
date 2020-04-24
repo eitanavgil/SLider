@@ -4,15 +4,10 @@ import Board from "./components/boards/Board/Board";
 import {cloneArray} from "./utils/Utils";
 
 const board: number[][] = [
-    [0, 2, 5, 1, 3],
-    [2, 5, 9, 3, 4],
-    [2, 4, 1, 5, 5],
+    [4, 2, 5, 1, 3],
+    [2, 1, 2, 3, 4],
+    [2, 4, 1, 3, 0],
 ];
-
-export interface boardItem {
-    index: number;
-    value: number;
-}
 
 function App() {
     return (
@@ -23,9 +18,9 @@ function App() {
             </div>
             <hr></hr>
             <h2>Target Board</h2>
-            <div className="App">
-                <Board boardData={board}></Board>
-            </div>
+            {/*<div className="App">*/}
+            {/*    <Board boardData={board}></Board>*/}
+            {/*</div>*/}
         </Fragment>
     );
 }
