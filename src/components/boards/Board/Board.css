@@ -1,0 +1,23 @@
+.slider-box {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+}
+.c0 {
+  background-color: purple;
+}
+.c1 {
+  background-color: yellow;
+}
+.c2 {
+  background-color: orange;
+}
+.c3 {
+  background-color: blue;
+}
+.c4 {
+  background-color: green;
+}
+.c5 {
+  background-color: red;
+}
