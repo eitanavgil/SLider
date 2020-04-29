@@ -1,23 +1,9 @@
-.slider-box {
-  width: 100px;
-  height: 100px;
-  display: inline-block;
+.board-row {
+    margin: 0;
+    padding: 0;
+    height: 75px;
 }
-.c0 {
-  background-color: purple;
-}
-.c1 {
-  background-color: yellow;
-}
-.c2 {
-  background-color: orange;
-}
-.c3 {
-  background-color: blue;
-}
-.c4 {
-  background-color: green;
-}
-.c5 {
-  background-color: red;
-}
+
+.preview .board-row {
+    height: 40px;
+} 

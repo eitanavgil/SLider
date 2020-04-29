@@ -1,26 +1,39 @@
-import React, {Fragment} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import "./App.css";
 import Board from "./components/boards/Board/Board";
-import {cloneArray} from "./utils/Utils";
+import {convertToBoardData} from "./utils/logic";
+
 
 const board: number[][] = [
-    [4, 2, 5, 1, 3],
-    [2, 1, 2, 3, 4],
-    [2, 4, 1, 3, 0],
+    [4, 5, 1],
+    [2, 0, 3],
+];
+const board2: number[][] = [
+    [4, 5, 1, 2, 4],
+    [2, 0, 3, 4, 3],
+    [4, 1, 2, 5, 2],
+    [3, 5, 3, 1, 4],
 ];
 
 function App() {
+
+    const [boardData, setboardData] = useState();
+
+    useEffect(() => {
+        // Update the document title using the browser API
+        setboardData(convertToBoardData(board));
+    }, []);
+
     return (
         <Fragment>
             <h2>Play Board</h2>
             <div className="App">
-                <Board boardData={board} interactive={true}></Board>
+                {boardData && <Board boardData={boardData} interactive={true}></Board>}
             </div>
-            <hr></hr>
             <h2>Target Board</h2>
-            {/*<div className="App">*/}
-            {/*    <Board boardData={board}></Board>*/}
-            {/*</div>*/}
+            <div className="App">
+                {boardData && <Board boardData={boardData} interactive={false}></Board>}
+            </div>
         </Fragment>
     );
 }

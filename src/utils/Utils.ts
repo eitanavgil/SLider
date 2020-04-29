@@ -1,42 +1,48 @@
-import {boardItem} from "../components/boards/Board/Board";
+import {boardItemData} from "../components/boards/Board/Board";
+import {cloneDeep} from 'lodash';
+import {getOptionalItemsForNextMove, makeMove} from "./logic";
 
-export const shuffle: Function = (array: []) => {
-    return array.sort(() => Math.random() - 0.5);
-};
-
-export const shuffle2DArray = (arrData: number[][]) => {
-    let copy = cloneArray(arrData as []);
-    for (let i = 0; i < copy.length; i++) {
-        (copy[i] as []) = shuffleArray(copy[i])
-    }
-    return shuffle(copy);
+export const replace2Items = (item1: boardItemData, item2: boardItemData) => {
+    const item1Value = item1.value;
+    item1.value = item2.value;
+    item2.value = item1Value;
 }
 
-export const shuffleArray = (arrData: any[]) => {
-    return shuffle(cloneArray(arrData as []));
-};
-
-export const cloneArray = (arr: []) => {
-    let i, copy;
-    if (Array.isArray(arr)) {
-        copy = arr.slice(0);
-        for (i = 0; i < copy.length; i++) {
-            // @ts-ignore
-            copy[i] = cloneArray(copy[i]);
-        }
-        return copy;
-    } else if (typeof arr === 'object') {
-        throw 'Cannot clone array containing an object!';
-    } else {
-        return arr;
-    }
+function getRandomFromArray(items: []) {
+    return items[Math.floor(Math.random() * items.length)];
 }
 
-export const convertToBoardItems = (data: [][], index: number): boardItem[][] => {
+export function moveRandomOnce(board: boardItemData[][]): boardItemData[][] {
+    let copy = cloneDeep(board);
+    const options = getOptionalItemsForNextMove(copy);
+    const rndItem = getRandomFromArray(options);
+    return makeMove(copy, rndItem);
+}
+
+export const shuffleArray = (board: boardItemData[][]): boardItemData[][] => {
+    // flat array and shuffle 
+    let copy = cloneDeep(board);
+    const shuffleVolume = 2;
+    for (var i = 0; i < shuffleVolume; i++) {
+        copy = moveRandomOnce(copy)
+    }
+    // rebuild 
+    return copy;
+};
+
+export const printBoard = (board: boardItemData[][]) => {
+    console.log(">>>>        [*************************] ");
+    board.forEach(line => {
+        console.log(">>>> ", line.map(i => `${i.value}-${i.index} -> R${i.allowedDirection}`));
+    })
+    console.log(">>>>        [*************************] ");
+}
+
+export const convertToBoardItems = (data: [][], index: number): boardItemData[][] => {
     const fill = [];
     data.forEach(line => {
         line.forEach(item => {
-            const bi: boardItem = {value: item, index: 1};
+            const bi: boardItemData = {value: item, index: 1};
             return bi;
         })
     })
@@ -49,4 +55,3 @@ export enum directions {
     LEFT = "LEFT",
     RIGHT = "RIGHT",
 }
-

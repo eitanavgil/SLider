@@ -1,17 +1,20 @@
 import React, {useEffect, useState} from "react";
 import "./Board.css";
-import {cloneArray, shuffle2DArray} from "../../../utils/Utils";
+import {cloneDeep, isEqual} from 'lodash';
 import SliderBox from "../../SliderBox/SliderBox";
-import {fillRestrictions} from "../../../utils/logic";
+import {fillRestrictions, getOptionalItemsForNextMove, makeMove, resetRestrictions} from "../../../utils/logic";
+import {directions, printBoard, shuffleArray} from "../../../utils/Utils";
+import "./Board.css";
 
 export interface props {
-    boardData: any[][];
+    boardData: boardItemData[][];
     interactive?: Boolean;
 }
 
-export interface boardItem {
+export interface boardItemData {
     index: number;
     value: number;
+    allowedDirection?: directions | undefined;
 }
 
 const defaultProps: props = {
@@ -19,59 +22,45 @@ const defaultProps: props = {
     interactive: false,
 };
 
-export interface boxData {
-    value: number,
-    index: number
-}
-
-//maps a 2D array of single numbers to {value,index} structure 
-const convertToBoardData = (board: number[][]): boxData[][] => {
-    return board.map((row, index, array) => {
-        // this is now a scope of one row
-        const newRow = cloneArray(row as []);
-        return newRow.map((item, itemIndex, array) => {
-            return {value: item, index: index * array.length + itemIndex};
-        })
-    })
-}
-
 const Board = (props: props) => {
-    useEffect(() => {
-        // Update the document title using the browser API
-        setBoard(getBoardData(props.boardData));
-        fillRestrictions(props.boardData);
-        // console.log(">>>> qq",)
-        // console.log(">>>> ",props.boardData);
-        // let cp = cloneArray(props.boardData as []);
-        // console.log(">>>> CP 1",cp);
-        // console.log(">>>> PPDD",props.boardData);
-        // // @ts-ignore
-        // cp[0][0] = 7;
-        // console.log(">>>> CP 2",cp);
-        // console.log(">>>> PPDD",props.boardData);
 
+    const nextMove = (item: boardItemData) => {
+        if (!props.interactive) {
+            return; // make sure we are not changing the next 
+        }
+        let board = makeMove(boardData, item);
+        board = resetRestrictions(board);
+        if (isEqual(board, props.boardData)) {
+            alert()
+        }
+        setBoardData(fillRestrictions(board));
+    }
+
+    const [boardData, setBoardData] = useState(cloneDeep(props.boardData));
+
+    useEffect(() => {
+        let newBoard = cloneDeep(props.boardData);
+        if (props.interactive) {
+            newBoard = shuffleArray(newBoard);
+        }
+        newBoard = fillRestrictions(newBoard);
+        setBoardData(newBoard);
     }, []);
 
-    const getBoardData = (boardData: number[][]): number[][] => {
-        // if (props.interactive) {
-        //     const sa = shuffle2DArray(boardData);
-        //     return sa;
-        // }
-        return boardData;
-    };
-
-    const [board, setBoard] = useState(getBoardData(props.boardData));
     return (
-        <div>
-            {convertToBoardData(board).map((row, i) => (
-                <div key={i}>
+        <div className={props.interactive ? "interactive" : "preview"}>
+            {boardData.map((row, i) => (
+                <div key={i} className={"board-row"}>
                     {row.map((col, j) => (
-                        <SliderBox key={j} value={col.value} index={col.index}></SliderBox>
+                        <SliderBox key={j}
+                                   data={col}
+                                   onMove={nextMove}
+                        ></SliderBox>
                     ))}
                 </div>
             ))}
         </div>
     );
 };
-Board.defaultProps = defaultProps;
+Board.defaultProps = {interactive: false};
 export default Board;
