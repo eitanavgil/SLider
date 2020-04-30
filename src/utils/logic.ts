@@ -1,4 +1,4 @@
-import {cloneDeep} from 'lodash';
+import {cloneDeep, isEqual} from 'lodash';
 import {directions, printBoard} from "./Utils";
 import {boardItemData} from "../components/boards/Board/Board";
 
@@ -53,7 +53,6 @@ export const fillRestrictions = (board: boardItemData[][]): boardItemData[][] =>
     const itemBelow = getItemBelow(emptyPosition, boardCopy);
     const itemToRight = getItemToRight(emptyPosition, cols, boardCopy);
     const itemToLeft = getItemToLeft(emptyPosition, boardCopy);
-    console.log(">>>> EE", itemAbove, itemBelow, itemToRight, itemToLeft)
     if (itemAbove) {
         itemAbove.allowedDirection = directions.DOWN
     }
@@ -84,7 +83,27 @@ export const findZeroCoordinates = (board: boardItemData[][]): coordinates => {
     }
 }
 
-// by reference
+
+// compare 2 and check 
+export const check = (board1: boardItemData[][], board2: boardItemData[][], gamePolicy?: any): boolean => {
+    switch (gamePolicy) {
+        case "normal": // by values - not by index 
+        default:
+            const cleanBoard1 = getValues(board1);
+            const cleanBoard2 = getValues(board2);
+            return isEqual(cleanBoard1, cleanBoard2)
+    }
+}
+
+// returns a matrix only of of the values 
+export const getValues = (board: boardItemData[][]): number[][] => {
+    return board.map((line) => {
+        return line.map((cell) => {
+            return cell.value
+        })
+    })
+
+}
 export const resetRestrictions = (board: boardItemData[][]): boardItemData[][] => {
     const copy = cloneDeep(board)
     for (let y = 0; y < copy.length; y++) {

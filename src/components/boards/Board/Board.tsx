@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import "./Board.css";
 import {cloneDeep, isEqual} from 'lodash';
 import SliderBox from "../../SliderBox/SliderBox";
-import {fillRestrictions, getOptionalItemsForNextMove, makeMove, resetRestrictions} from "../../../utils/logic";
+import {check, fillRestrictions, getOptionalItemsForNextMove, makeMove, resetRestrictions} from "../../../utils/logic";
 import {directions, printBoard, shuffleArray} from "../../../utils/Utils";
 import "./Board.css";
 
@@ -30,10 +30,12 @@ const Board = (props: props) => {
         }
         let board = makeMove(boardData, item);
         board = resetRestrictions(board);
-        if (isEqual(board, props.boardData)) {
-            alert()
-        }
         setBoardData(fillRestrictions(board));
+        if (check(board, props.boardData)) {
+            setTimeout(() => {
+                alert("DONE")
+            },50)
+        }
     }
 
     const [boardData, setBoardData] = useState(cloneDeep(props.boardData));
