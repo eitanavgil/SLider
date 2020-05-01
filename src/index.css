@@ -4,7 +4,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: darkslategrey;
+  background-color: #112525;
+  color: darkgray;
 }
 
 code {

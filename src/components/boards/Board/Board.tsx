@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import "./Board.css";
 import {cloneDeep, isEqual} from 'lodash';
 import SliderBox from "../../SliderBox/SliderBox";
 import {check, fillRestrictions, getOptionalItemsForNextMove, makeMove, resetRestrictions} from "../../../utils/logic";
@@ -9,6 +8,8 @@ import "./Board.css";
 export interface props {
     boardData: boardItemData[][];
     interactive?: Boolean;
+    onEnded?: () => void;
+    onStarted?: () => void;
 }
 
 export interface boardItemData {
@@ -25,6 +26,7 @@ const defaultProps: props = {
 const Board = (props: props) => {
 
     const nextMove = (item: boardItemData) => {
+        props.onStarted && props.onStarted();
         if (!props.interactive) {
             return; // make sure we are not changing the next 
         }
@@ -33,8 +35,10 @@ const Board = (props: props) => {
         setBoardData(fillRestrictions(board));
         if (check(board, props.boardData)) {
             setTimeout(() => {
-                alert("DONE")
-            },50)
+                if (props.onEnded) {
+                    props.onEnded()
+                }
+            }, 50)
         }
     }
 

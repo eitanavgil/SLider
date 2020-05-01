@@ -55,3 +55,20 @@ export enum directions {
     LEFT = "LEFT",
     RIGHT = "RIGHT",
 }
+
+export const pad = (n: number) => {
+    if (n >= 100) {
+        n = Math.round(n / 10);
+    }
+    return n < 10 ? "0" + n : n
+}
+export const msToTime = (s: number) => {
+    // Pad to 2 or 3 digits, default is 2
+    let ms = s % 1000;
+    s = (s - ms) / 1000;
+    let secs = s % 60;
+    s = (s - secs) / 60;
+    let mins = s % 60;
+    let hrs = (s - mins) / 60;
+    return pad(mins) + ':' + pad(secs) + '.' + pad(ms);
+}
