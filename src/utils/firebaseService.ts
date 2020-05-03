@@ -16,24 +16,95 @@ export class FirebaseService {
         (window as any).db = this.db
     }
 
-    public getGameById = (gameId: string, callbackF: (o: any) => void) => {
+    public addUserToGame = (user: string, game: number, callback: (o: any) => void) => {
+
+        if (!this.db) {
+            return
+        }
+
+        let namesRef =
+            this.db.collection('games')
+                .doc(game.toString())
+                .get()
+                .then((snapshot) => {
+                    let currentAr = (snapshot.data() as any).names as [];
+                    // @ts-ignore
+                    if (currentAr.find(item => item.name === user)) {
+                        alert("Existing user")
+                        return;
+                    }
+                    // @ts-ignore
+                    currentAr.push({name: user, score: 0});
+
+                    this.db!.collection('games')
+                        .doc(game.toString())
+                        .update({names: currentAr})
+                        .then(snapshot => {
+                            this.getGameById(game, callback)
+                        })
+
+                })
+
+    }
+    public submitScore = (name: string, gameId: number, score: number) => {
         if (!this.db) {
             return
         }
         this.db.collection("games")
+            .doc(gameId.toString())
+            .get().then((snapshot) => {
+            let names = (snapshot.data() as any).names as [];
+            const newNames = names.map((item: any) => {
+                if (item.name === name) {
+                    item.score = score;
+                }
+                return item;
+            })
+            if (newNames.length) {
+                this.db!.collection("games").doc(gameId.toString()).update({
+                    names: names
+                })
+            }
+        })
+    }
+
+    public getGameById = (gameId: number, callbackF: (o: any) => void) => {
+        if (!this.db) {
+            return
+        }
+        this.db.collection("games")
+            .doc(gameId.toString())
             .get()
             .then((snapshot) => {
-                snapshot.docs.forEach(doc => {
-                    if (!doc.data().gameId) {
-                        return;
-                    }
-                    if (doc.data().gameId.toString() === gameId.toString() && doc.data().target && doc.data().scrambled) {
-                        callbackF({target: JSON.parse(doc.data().target), scrambled: JSON.parse(doc.data().scrambled)})
-                    }
-                })
+                const gameData: any = snapshot.data()
+                if (!gameData) {
+                    callbackF({message: "Game not found!"})
+                    return;
+                }
+                if (gameData.target && gameData.scrambled) {
+                    callbackF({
+                        target: JSON.parse(gameData.target),
+                        scrambled: JSON.parse(gameData.scrambled)
+                    })
+                    return;
+                }
+                callbackF({message: "Game not found!"})
+            })
+            .catch(() => {
+                callbackF({message: "Error"})
             })
     }
-    public createGame = (target: boardItemData[][], scrambled: boardItemData[][]) => {
+    public startGame = (gameId: number) => {
+        if (!this.db) {
+            return
+        }
+        this.db.collection("games").doc(gameId.toString()).update({status: "started"})
+    }
+    public endGame = (gameId: number) => {
+
+    }
+
+    public createGame = (target: boardItemData[][], scrambled: boardItemData[][], callback: (v: any) => void) => {
         if (!this.db) {
             return
         }
@@ -43,15 +114,20 @@ export class FirebaseService {
             if (!this.db) {
                 return
             }
-            this.db.collection("games").add({
+
+            this.db.collection("games").doc(latest.toString()).set({
                 status: "init",
-                gameId: latest,
+                names: [],
                 scrambled: JSON.stringify(scrambled),
                 target: JSON.stringify(target)
             })
+
             this.db.collection("games")
                 .doc("latest")
                 .update({value: latest})
+                .then(() => {
+                    callback(latest);
+                })
         })
     }
 }

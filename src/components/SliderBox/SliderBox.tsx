@@ -42,29 +42,29 @@ const SlideBox = (props: props) => {
         }
     }
 
-    const [dir, setDir] = useState("");
+    // const [dir, setDir] = useState("");
 
-    const getDirectionIcon = (dir: directions | undefined) => {
-        switch (dir) {
-            case directions.RIGHT:
-                return "➡︎";
-            case directions.UP:
-                return "⬆︎";
-            case directions.DOWN:
-                return "⬇︎";
-            case directions.LEFT:
-                return "⬅︎︎";
-
-        }
-        return "︎";
-    }
+    // const getDirectionIcon = (dir: directions | undefined) => {
+    //     switch (dir) {
+    //         case directions.RIGHT:
+    //             return "➡︎";
+    //         case directions.UP:
+    //             return "⬆︎";
+    //         case directions.DOWN:
+    //             return "⬇︎";
+    //         case directions.LEFT:
+    //             return "⬅︎︎";
+    //
+    //     }
+    //     return "︎";
+    // }
     return <div
         {...handlers}
         className={`slider-box c${props.data.value}`}
         onClick={handleClick}>
-        <div className={"slide-inner"}>
-            {getDirectionIcon(props.data.allowedDirection)}
-        </div>
+        {/*<div className={"slide-inner"}>*/}
+        {/*    {getDirectionIcon(props.data.allowedDirection)}*/}
+        {/*</div>*/}
     </div>
 
 };

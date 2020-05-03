@@ -39,7 +39,6 @@
 }
 
 .game-options {
-    background: #0046ad;
     display: block;
     align-items: center;
     justify-content: center;
@@ -61,3 +60,11 @@
     font-size: x-large;
     margin: 16px;
 }
+.control-button, 
+.shuffle-button {
+    margin-top: 16px;
+    color: #a9a9a9;
+    background: #0046ad;
+    border: none;
+}
+

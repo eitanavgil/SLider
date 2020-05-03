@@ -3,19 +3,18 @@ import {convertToBoardData} from "./utils/logic";
 import Board, {boardItemData} from "./components/boards/Board/Board";
 import React, {Fragment, useEffect, useState, useRef} from "react";
 import Timer from "./components/Timer/Timer";
-import {shuffleArray} from "./utils/Utils";
+import {printBoard, shuffleArray} from "./utils/Utils";
 import {FirebaseService} from "./utils/firebaseService";
+import {cloneDeep} from "lodash";
+import {strict} from "assert";
 // import joinGame from "./utils/firebase";
 
-const board: number[][] = [
+const board1: number[][] = [
     [4, 5, 1],
     [2, 0, 3],
     [3, 1, 4],
 ];
-const board1: number[][] = [
-    [4, 5],
-    [2, 0],
-];
+
 const board2: number[][] = [
     [4, 5, 1, 2, 4],
     [2, 0, 3, 4, 3],
@@ -31,6 +30,11 @@ const board4: number[][] = [
     [2, 0, 3],
     [2, 2, 3],
     [2, 2, 3],
+];
+const board5: number[][] = [
+    [3, 0, 3],
+    [2, 2, 3],
+
 ];
 
 export enum GameState {
@@ -50,47 +54,68 @@ export interface gameData {
 let fb: FirebaseService
 
 function App() {
+
     const gameInput = useRef(null);
     const nameInput = useRef(null);
-    const [boardData, setboardData] = useState();
+    const [boardData, setBoardData] = useState<gameData>();
     const [timerStarted, setTimerStarted] = useState(false);
     const [gameState, setGameState] = useState(GameState.init);
+    const [gameId, setGameId] = useState();
+    const [user, setUser] = useState();
 
 
     useEffect(() => {
         if (gameState === GameState.init) {
             fb = new FirebaseService();
         }
+        if (gameState === GameState.end) {
+            fb.submitScore(user, gameId, 50);
+        }
         if (gameState === GameState.create) {
-            fb.createGame(convertToBoardData(board3), shuffleArray(convertToBoardData(board3)));
+            const myBoard = board5;
+            setBoardData({
+                target: (convertToBoardData(myBoard)),
+                scrambled: (shuffleArray(convertToBoardData(myBoard)))
+            })
+            fb.createGame(convertToBoardData(myBoard), shuffleArray(convertToBoardData(myBoard)), (gameId) => {
+                setGameId(gameId);
+            });
         }
     }, [gameState]);
 
-    useEffect(() => {
-        // Update the document title using the browser API
-        // setboardData(convertToBoardData(board2));
 
-        const target = convertToBoardData(board2);
-        const scrambled = shuffleArray(target);
-
-    }, []);
-
-    const initGame = () => {
-        // setboardData(convertToBoardData(board2));
+    const startGame = () => {
+        fb.startGame(gameId);
+    }
+    const endGame = () => {
+        fb.endGame(gameId);
     }
     const join = () => {
-        if (gameInput && (gameInput.current as any).value && fb) {
+
+        if (gameInput && (gameInput.current as any).value && (nameInput.current as any).value && fb) {
             if (!fb) {
                 return;
             }
-            fb.getGameById((gameInput.current as any).value, (data: any): any => {
+
+            setUser((nameInput.current as any).value);
+            setGameId((gameInput.current as any).value);
+
+            // add user
+            fb.addUserToGame((nameInput.current as any).value, (gameInput.current as any).value, (data: any) => {
+                if (data.message) {
+                    alert(data.message);
+                    return;
+                }
                 // @ts-ignore
-                setboardData({
+                setBoardData({
                     target: (data.target as boardItemData[][]),
                     scrambled: (data.scrambled as boardItemData[][])
                 })
                 setGameState(GameState.gameInit);
-            });
+            })
+
+        } else {
+            alert("Bot fields are mandatory")
         }
     }
 
@@ -109,21 +134,30 @@ function App() {
             </div>
             }
             {gameState === GameState.end &&
-            <h2>YEY</h2>
+            <Fragment>
+                <h2>YEY</h2>
+                <h2>Submitting your Score !</h2>
+            </Fragment>
             }
             {gameState === GameState.join &&
             <div className="game-options">
-                <input type="number" className="join-input" ref={gameInput} placeholder={"Game Id"}/>
-                <input type="text" className="join-input" ref={nameInput} placeholder={"Name"}/>
-                <button onClick={() => join()}
+                <input type="number" className="join-input"
+                       ref={gameInput} placeholder={"Game Id"}/>
+                <input type="text" className="join-input"
+                       ref={nameInput} placeholder={"Name"}/>
+                <button onClick={(e) => join()}
                         className={"game-action"}>JOIN
                 </button>
             </div>
             }
-            {(gameState === GameState.gameInit || gameState === GameState.playing) && boardData &&
+            {(gameState === GameState.gameInit ||
+                gameState === GameState.playing ||
+                gameState === GameState.create
+            ) && boardData && gameId &&
             <Fragment>
                 <h2>Play Board</h2>
                 <div className="App">
+                    {gameId && <h3>{`Game Id:${gameId}`}</h3>}
                     {boardData &&
                     <Board boardData={boardData} interactive={true}
                            onStarted={() => {
@@ -143,6 +177,13 @@ function App() {
                         <Board boardData={boardData} interactive={false}></Board>
                     </Fragment>
                     }
+                    {gameState === GameState.create &&
+                    <Fragment>
+                        <button className="control-button start-game" onClick={startGame}>Start Game To All</button>
+                        <button className="control-button end-game" onClick={endGame}>End Game To All</button>
+                    </Fragment>
+                    }
+
                 </div>
             </Fragment>
             }

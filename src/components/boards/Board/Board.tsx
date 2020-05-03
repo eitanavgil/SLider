@@ -46,7 +46,7 @@ const Board = (props: props) => {
         let board = makeMove(boardData, item, props.gameMode);
         board = resetRestrictions(board);
         setBoardData(fillRestrictions(board, props.gameMode));
-        if (check(board, props.boardData.scrambled)) {
+        if (check(board, props.boardData.target)) {
             setTimeout(() => {
                 if (props.onEnded) {
                     props.onEnded()
@@ -57,11 +57,11 @@ const Board = (props: props) => {
 
     useEffect(() => {
         if (props.interactive && props.boardData.target) {
-            let newBoard = cloneDeep(props.boardData.target);
+            let newBoard = cloneDeep(props.boardData.scrambled);
             newBoard = fillRestrictions(newBoard, props.gameMode);
             setBoardData(newBoard);
-        }else{
-            let newBoard = cloneDeep(props.boardData.scrambled);
+        } else {
+            let newBoard = cloneDeep(props.boardData.target);
             newBoard = fillRestrictions(newBoard, props.gameMode);
             setBoardData(newBoard);
         }
@@ -71,9 +71,9 @@ const Board = (props: props) => {
     // @ts-ignore
     return (
         <div className={props.interactive ? "interactive" : "preview"}>
-            {boardData && boardData.map((row:[], i:number) => (
+            {boardData && boardData.map((row: [], i: number) => (
                 <div key={i} className={"board-row"}>
-                    {row.map((col:[], j:number) => (
+                    {row.map((col: [], j: number) => (
                         <SliderBox key={j}
                                    data={col}
                                    onMove={nextMove}
