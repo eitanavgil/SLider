@@ -1,6 +1,6 @@
-import {cloneDeep, isEqual} from 'lodash';
+import {cloneDeep, flatten, isEqual, reverse} from 'lodash';
 import {directions, printBoard} from "./Utils";
-import {boardItemData} from "../components/boards/Board/Board";
+import {boardItemData, GameMode} from "../components/boards/Board/Board";
 
 /*
  this func receives a board and "tells" every box which direction it is allowed to move to
@@ -41,18 +41,39 @@ export const getOptionalItemsForNextMove = (board: boardItemData[][]): [] => {
 }
 
 // this takes data array and fills all cells with their optional directions 
-export const fillRestrictions = (board: boardItemData[][]): boardItemData[][] => {
+export const fillRestrictions = (board: boardItemData[][], gameMode?: GameMode): boardItemData[][] => {
     // TODO - clear prev positions 
     let boardCopy = cloneDeep(board);
     // reset previous restrictions 
     boardCopy = resetRestrictions(boardCopy);
+    const coordintesOfEmpty = findZeroCoordinates(boardCopy);
+    if (gameMode === GameMode.multiple) {
+        // vertical 
+        const flattenArray = flatten(boardCopy);
+        const itemsAbove = getItemsAbove(flattenArray, coordintesOfEmpty);
+        const itemsBelow = getItemsBelow(flattenArray, coordintesOfEmpty);
+        const itemsToRight = getItemsToRight(flattenArray, coordintesOfEmpty);
+        const itemsToLeft = getItemsToLeft(flattenArray, coordintesOfEmpty);
+        if (itemsAbove) {
+            itemsAbove.map(i => i.allowedDirection = directions.DOWN);
+        }
+        if (itemsBelow) {
+            itemsBelow.map(i => i.allowedDirection = directions.UP);
+        }
+        if (itemsToRight) {
+            itemsToRight.map(i => i.allowedDirection = directions.LEFT);
+        }
+        if (itemsToLeft) {
+            itemsToLeft.map(i => i.allowedDirection = directions.RIGHT);
+        }
+        return boardCopy
+    }
     const cols = board[0].length;
     // look for the empty (0) position 
-    const emptyPosition = findZeroCoordinates(boardCopy);
-    const itemAbove = getItemAbove(emptyPosition, boardCopy);
-    const itemBelow = getItemBelow(emptyPosition, boardCopy);
-    const itemToRight = getItemToRight(emptyPosition, cols, boardCopy);
-    const itemToLeft = getItemToLeft(emptyPosition, boardCopy);
+    const itemAbove = getItemAbove(coordintesOfEmpty, boardCopy);
+    const itemBelow = getItemBelow(coordintesOfEmpty, boardCopy);
+    const itemToRight = getItemToRight(coordintesOfEmpty, cols, boardCopy);
+    const itemToLeft = getItemToLeft(coordintesOfEmpty, boardCopy);
     if (itemAbove) {
         itemAbove.allowedDirection = directions.DOWN
     }
@@ -68,6 +89,7 @@ export const fillRestrictions = (board: boardItemData[][]): boardItemData[][] =>
     return boardCopy;
     // TODO - support slide is simpler - same row and same height
 }
+
 
 // @ts-ignore
 export const findZeroCoordinates = (board: boardItemData[][]): coordinates => {
@@ -110,13 +132,15 @@ export const resetRestrictions = (board: boardItemData[][]): boardItemData[][] =
         const row = copy[y];
         for (let x = 0; x < row.length; x++) {
             const item = row[x];
+            item.x = x;
+            item.y = y;
             delete item.allowedDirection;
         }
     }
     return copy;
 }
 
-export const getZeroItem = (board: boardItemData[][]) => {
+export const getZeroItem = (board: boardItemData[][]): boardItemData | null => {
     for (let y = 0; y < board.length; y++) {
         const row = board[y];
         for (let x = 0; x < row.length; x++) {
@@ -127,6 +151,7 @@ export const getZeroItem = (board: boardItemData[][]) => {
             }
         }
     }
+    return null;
 }
 
 
@@ -167,6 +192,29 @@ export const getItemBelow = (coordinates: coordinates, board: boardItemData[][])
     return getItemByCoordinates(coordinates.x, coordinates.y + 1, board);
 }
 
+///////////////////////////
+export const getItemsAbove = (flattenBoard: boardItemData[], zeroCoordinates: coordinates): boardItemData[] => {
+    return flattenBoard.filter((item: boardItemData) => {
+        return item.x !== undefined && item.x === zeroCoordinates.x && item.y !== undefined && item.y < zeroCoordinates.y
+    })
+}
+export const getItemsBelow = (flattenBoard: boardItemData[], zeroCoordinates: coordinates): boardItemData[] => {
+    return flattenBoard.filter((item: boardItemData) => {
+        return item.x !== undefined && item.x === zeroCoordinates.x && item.y !== undefined && item.y > zeroCoordinates.y
+    })
+}
+export const getItemsToRight = (flattenBoard: boardItemData[], zeroCoordinates: coordinates): boardItemData[] => {
+    return flattenBoard.filter((item: boardItemData) => {
+        return item.x !== undefined && item.x > zeroCoordinates.x && item.y !== undefined && item.y === zeroCoordinates.y
+    })
+}
+export const getItemsToLeft = (flattenBoard: boardItemData[], zeroCoordinates: coordinates): boardItemData[] => {
+    return flattenBoard.filter((item: boardItemData) => {
+        return item.x !== undefined && item.x < zeroCoordinates.x && item.y !== undefined && item.y === zeroCoordinates.y
+    })
+}
+
+
 //maps a 2D array of single numbers to {value,index} structure 
 export const convertToBoardData = (board: number[][]): boardItemData[][] => {
     const copy = cloneDeep(board);
@@ -179,16 +227,64 @@ export const convertToBoardData = (board: number[][]): boardItemData[][] => {
     })
 }
 
-export const makeMove = (board: boardItemData[][], item: boardItemData) => {
+export const makeMove = (board: boardItemData[][], item: boardItemData, gameMode?: GameMode) => {
     const copy = cloneDeep(board);
     const zero = getZeroItem(copy);
     const zeroCoordinates = findZeroCoordinates(copy);
     const itemCoordinates = getCoordinatesByItem(copy, item);
+    if (gameMode === GameMode.multiple) {
+        // here we need to find out if the item is left/right/above/below
+        multiMove(copy, item, zeroCoordinates, zero!);
+        return copy
+    }
+
+    // simple mode - switch only one with the empty      
     copy[zeroCoordinates.y][zeroCoordinates.x] = item;
     // @ts-ignore
     copy[itemCoordinates.y][itemCoordinates.x] = zero;
     return copy;
 }
+// receive an item to move and the board - returns an updated board with results
+export const multiMove = (board: boardItemData[][], item: boardItemData, zeroCoordinates: coordinates, zeroItem: boardItemData) => {
+    const copy = cloneDeep(board);
+    if (!item.allowedDirection) {
+        return
+    }
+    const flattenArray = flatten(copy);
+    // find out which side the item is 
+    switch (item.allowedDirection) {
+        case directions.RIGHT:
+            // item is left to empty
+            const itemsToLeft = reverse(getItemsToLeft(flattenArray, zeroCoordinates));
+            for (let i = 0; i < itemsToLeft.length; i++) {
+                // iterate all items that has X above=items X
+                // @ts-ignore
+                if (itemsToLeft[i].x >= item.x) {
+                    // replaceItems(copy, zeroItem, itemsToLeft[i]);
+                }
+            }
+            
+            return fillRestrictions(copy);
+            break;
+        // item is right to empty
+        case directions.LEFT:
+            break;
+        case directions.UP:
+            // item is below empty
+            break;
+        case directions.DOWN:
+            // item is above empty
+            break;
+    }
+}
 export const replaceItems = (board: boardItemData[][], item1: boardItemData, item2: boardItemData) => {
-
+    const tmp1 = cloneDeep(item1);
+    const tmp2 = cloneDeep(item2);
+    debugger;
+    item1.x = tmp2.x;
+    item1.y = tmp2.y;
+    item1.value = tmp2.value;
+    item2.x = tmp1.x;
+    item2.y = tmp1.y;
+    item2.value = tmp1.value;
 }

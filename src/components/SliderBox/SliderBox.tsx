@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import "./SliderBox.css";
 import {useSwipeable} from 'react-swipeable'
 import {directions} from "../../utils/Utils";
-import Board, {boardItemData} from "../boards/Board/Board";
+import {boardItemData} from "../boards/Board/Board";
 
 export interface props {
     interactive: boolean;
@@ -44,12 +44,27 @@ const SlideBox = (props: props) => {
 
     const [dir, setDir] = useState("");
 
+    const getDirectionIcon = (dir: directions | undefined) => {
+        switch (dir) {
+            case directions.RIGHT:
+                return "➡︎";
+            case directions.UP:
+                return "⬆︎";
+            case directions.DOWN:
+                return "⬇︎";
+            case directions.LEFT:
+                return "⬅︎︎";
+
+        }
+        return "︎";
+    }
     return <div
         {...handlers}
         className={`slider-box c${props.data.value}`}
         onClick={handleClick}>
-        {/*{`${dir} ${props.data.value} - ${props.data.index}`}<br/>*/}
-        {/*{props.data.allowedDirection ? `${props.data.allowedDirection}` : "none"}*/}
+        <div className={"slide-inner"}>
+            {getDirectionIcon(props.data.allowedDirection)}
+        </div>
     </div>
 
 };

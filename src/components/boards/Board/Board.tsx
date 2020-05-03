@@ -6,19 +6,28 @@ import {directions, printBoard, shuffleArray} from "../../../utils/Utils";
 import "./Board.css";
 
 export interface props {
+    gameMode?: GameMode;
     boardData: boardItemData[][];
     interactive?: Boolean;
     onEnded?: () => void;
     onStarted?: () => void;
 }
 
+export enum GameMode {
+    "simple" = "simple",
+    "multiple" = "multiple"
+}
+
 export interface boardItemData {
+    x?: number;
+    y?: number;
     index: number;
     value: number;
     allowedDirection?: directions | undefined;
 }
 
 const defaultProps: props = {
+    gameMode: GameMode.simple,
     boardData: [],
     interactive: false,
 };
@@ -26,13 +35,13 @@ const defaultProps: props = {
 const Board = (props: props) => {
 
     const nextMove = (item: boardItemData) => {
-        props.onStarted && props.onStarted();
         if (!props.interactive) {
             return; // make sure we are not changing the next 
         }
-        let board = makeMove(boardData, item);
+        props.onStarted && props.onStarted();
+        let board = makeMove(boardData, item, props.gameMode);
         board = resetRestrictions(board);
-        setBoardData(fillRestrictions(board));
+        setBoardData(fillRestrictions(board, props.gameMode));
         if (check(board, props.boardData)) {
             setTimeout(() => {
                 if (props.onEnded) {
@@ -49,7 +58,7 @@ const Board = (props: props) => {
         if (props.interactive) {
             newBoard = shuffleArray(newBoard);
         }
-        newBoard = fillRestrictions(newBoard);
+        newBoard = fillRestrictions(newBoard, props.gameMode);
         setBoardData(newBoard);
     }, []);
 
@@ -68,5 +77,5 @@ const Board = (props: props) => {
         </div>
     );
 };
-Board.defaultProps = {interactive: false};
+Board.defaultProps = defaultProps;
 export default Board;
