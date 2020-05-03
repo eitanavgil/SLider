@@ -16,16 +16,20 @@ export class FirebaseService {
         (window as any).db = this.db
     }
 
-    public getGameById = (gameId: string) => {
+    public getGameById = (gameId: string, callbackF: (o: any) => void) => {
         if (!this.db) {
             return
         }
         this.db.collection("games")
-            .where("gameId", "==", gameId).get()
+            .get()
             .then((snapshot) => {
                 snapshot.docs.forEach(doc => {
-                    console.log(">>>> doc", doc.data().target);
-                    console.log(">>>> doc", doc.data().scrambled);
+                    if (!doc.data().gameId) {
+                        return;
+                    }
+                    if (doc.data().gameId.toString() === gameId.toString() && doc.data().target && doc.data().scrambled) {
+                        callbackF({target: JSON.parse(doc.data().target), scrambled: JSON.parse(doc.data().scrambled)})
+                    }
                 })
             })
     }
@@ -33,7 +37,6 @@ export class FirebaseService {
         if (!this.db) {
             return
         }
-
         this.db.collection("games").doc("latest").get().then(s => {
             let latest = parseInt((s.data() as any).value);
             latest += 1;
@@ -50,44 +53,8 @@ export class FirebaseService {
                 .doc("latest")
                 .update({value: latest})
         })
-
-
     }
-
-
 }
 
 
-// db.collection("games").onSnapshot(snapshot => {
-//     let changes = snapshot.docChanges();
-//     changes.forEach(change => {
-//         if (change.type === "added") {
-//             console.log(">>>> added", change.doc.data())
-//         }
-//         if (change.type === "removed") {
-//             console.log(">>>> removed", change.doc.data())
-//         }
-//     })
-// })
-
-
-// get latest - TODO - target better
-// db.collection("games").get().then(snapshot => {
-//     snapshot.docs.forEach(i => {
-//         if (i.id === "latest") {
-//             console.log(">>>> latest", i.data())
-//         }
-//     })
-// })
-// advance latest 
-// db.collection("games").doc("latest").update({value: 165})
-
-
-// write to DB
-// db.collection("games").add({
-//     status: "init",
-//     gameId: "167",
-//     scrambled: JSON.stringify(scrambled),
-//     target: JSON.stringify(target)
-// })
 

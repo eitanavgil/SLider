@@ -1,13 +1,15 @@
+// @ts-nocheck
 import React, {useEffect, useState} from "react";
 import {cloneDeep, isEqual} from 'lodash';
 import SliderBox from "../../SliderBox/SliderBox";
 import {check, fillRestrictions, getOptionalItemsForNextMove, makeMove, resetRestrictions} from "../../../utils/logic";
 import {directions, printBoard, shuffleArray} from "../../../utils/Utils";
 import "./Board.css";
+import {gameData} from "../../../App";
 
 export interface props {
     gameMode?: GameMode;
-    boardData: boardItemData[][];
+    boardData: gameData;
     interactive?: Boolean;
     onEnded?: () => void;
     onStarted?: () => void;
@@ -28,11 +30,13 @@ export interface boardItemData {
 
 const defaultProps: props = {
     gameMode: GameMode.simple,
-    boardData: [],
+    boardData: {},
     interactive: false,
 };
 
 const Board = (props: props) => {
+
+    const [boardData, setBoardData] = useState();
 
     const nextMove = (item: boardItemData) => {
         if (!props.interactive) {
@@ -42,7 +46,7 @@ const Board = (props: props) => {
         let board = makeMove(boardData, item, props.gameMode);
         board = resetRestrictions(board);
         setBoardData(fillRestrictions(board, props.gameMode));
-        if (check(board, props.boardData)) {
+        if (check(board, props.boardData.scrambled)) {
             setTimeout(() => {
                 if (props.onEnded) {
                     props.onEnded()
@@ -51,22 +55,25 @@ const Board = (props: props) => {
         }
     }
 
-    const [boardData, setBoardData] = useState(cloneDeep(props.boardData));
-
     useEffect(() => {
-        let newBoard = cloneDeep(props.boardData);
-        if (props.interactive) {
-            newBoard = shuffleArray(newBoard);
+        if (props.interactive && props.boardData.target) {
+            let newBoard = cloneDeep(props.boardData.target);
+            newBoard = fillRestrictions(newBoard, props.gameMode);
+            setBoardData(newBoard);
+        }else{
+            let newBoard = cloneDeep(props.boardData.scrambled);
+            newBoard = fillRestrictions(newBoard, props.gameMode);
+            setBoardData(newBoard);
         }
-        newBoard = fillRestrictions(newBoard, props.gameMode);
-        setBoardData(newBoard);
+
     }, []);
 
+    // @ts-ignore
     return (
         <div className={props.interactive ? "interactive" : "preview"}>
-            {boardData.map((row, i) => (
+            {boardData && boardData.map((row:[], i:number) => (
                 <div key={i} className={"board-row"}>
-                    {row.map((col, j) => (
+                    {row.map((col:[], j:number) => (
                         <SliderBox key={j}
                                    data={col}
                                    onMove={nextMove}

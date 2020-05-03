@@ -39,16 +39,25 @@
 }
 
 .game-options {
-    width: 100%;
-    text-align: center;
+    background: #0046ad;
+    display: block;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    padding-top: 16px
 }
 
 .join-input {
+
+    display: block;
     font-size: x-large;
+    margin: 0 auto;
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 .game-action {
+    margin: 0 auto;
     font-size: x-large;
-    display: inline-block;
     margin: 16px;
 }

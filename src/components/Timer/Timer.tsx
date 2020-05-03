@@ -4,6 +4,7 @@ import React, {useState, useEffect} from "react";
 
 export interface props {
     start: boolean;
+    onEnded?: () => void
 }
 
 export interface state {
@@ -17,6 +18,9 @@ const Timer = (props: props) => {
 
     useEffect(() => {
         if (!props.start) {
+            if(props.onEnded && time ){
+                props.onEnded();
+            }
             return;
         }
         setTime({startTime: new Date()})

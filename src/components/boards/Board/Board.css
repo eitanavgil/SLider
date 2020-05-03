@@ -1,10 +1,10 @@
 .board-row {
     margin: 0;
     padding: 0;
-    height: 75px;
+    height: 64px;
     margin: 4px;
 }
 
 .preview .board-row {
-    height: 40px;
+    height: 30px;
 } 
