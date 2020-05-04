@@ -35,18 +35,24 @@ export class FirebaseService {
                     }
                     // @ts-ignore
                     currentAr.push({name: user, score: 0});
-
                     this.db!.collection('games')
                         .doc(game.toString())
                         .update({names: currentAr})
                         .then(snapshot => {
                             this.getGameById(game, callback)
                         })
-
+                    this.db!.collection('games')
+                        .onSnapshot((snapshot) => {
+                            let changes = snapshot.docChanges();
+                            changes.forEach(change => {
+                                console.log(">>>> change.type", change.type)
+                            })
+                        })
                 })
-
     }
-    public submitScore = (name: string, gameId: number, score: number) => {
+
+
+    public submitScore = (name: string, gameId: number, score: string) => {
         if (!this.db) {
             return
         }

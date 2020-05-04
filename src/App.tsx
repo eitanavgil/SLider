@@ -5,9 +5,7 @@ import React, {Fragment, useEffect, useState, useRef} from "react";
 import Timer from "./components/Timer/Timer";
 import {printBoard, shuffleArray} from "./utils/Utils";
 import {FirebaseService} from "./utils/firebaseService";
-import {cloneDeep} from "lodash";
-import {strict} from "assert";
-// import joinGame from "./utils/firebase";
+import Lobby from "./components/Lobby/Lobby";
 
 const board1: number[][] = [
     [4, 5, 1],
@@ -41,7 +39,7 @@ export enum GameState {
     "init" = "init",
     "join" = "join",
     "create" = "create",
-    "gameInit" = "gameInit",
+    "lobby" = "lobby",
     "playing" = "playing",
     "end" = "end",
 }
@@ -60,8 +58,9 @@ function App() {
     const [boardData, setBoardData] = useState<gameData>();
     const [timerStarted, setTimerStarted] = useState(false);
     const [gameState, setGameState] = useState(GameState.init);
-    const [gameId, setGameId] = useState();
+    const [gameId, setGameId] = useState(1);
     const [user, setUser] = useState();
+    const [time, SetTime] = useState();
 
 
     useEffect(() => {
@@ -69,7 +68,6 @@ function App() {
             fb = new FirebaseService();
         }
         if (gameState === GameState.end) {
-            fb.submitScore(user, gameId, 50);
         }
         if (gameState === GameState.create) {
             const myBoard = board5;
@@ -86,6 +84,9 @@ function App() {
 
     const startGame = () => {
         fb.startGame(gameId);
+    }
+    const setTimerEnded = (time: string) => {
+        fb.submitScore(user, gameId, time)
     }
     const endGame = () => {
         fb.endGame(gameId);
@@ -111,7 +112,7 @@ function App() {
                     target: (data.target as boardItemData[][]),
                     scrambled: (data.scrambled as boardItemData[][])
                 })
-                setGameState(GameState.gameInit);
+                setGameState(GameState.lobby);
             })
 
         } else {
@@ -121,7 +122,7 @@ function App() {
 
     return (
         <Fragment>
-            <Timer start={timerStarted}/>
+            <Timer start={timerStarted} onEnded={(v) => setTimerEnded(v)}/>
             {gameState === GameState.init &&
             <div className="game-options">
                 <h2>What would you like to do?</h2>
@@ -133,6 +134,10 @@ function App() {
                 </button>
             </div>
             }
+            {gameState === GameState.lobby &&
+            <Lobby/>
+            }
+
             {gameState === GameState.end &&
             <Fragment>
                 <h2>YEY</h2>
@@ -141,7 +146,7 @@ function App() {
             }
             {gameState === GameState.join &&
             <div className="game-options">
-                <input type="number" className="join-input"
+                <input type="number" className="join-input" value={gameId}
                        ref={gameInput} placeholder={"Game Id"}/>
                 <input type="text" className="join-input"
                        ref={nameInput} placeholder={"Name"}/>
@@ -150,10 +155,10 @@ function App() {
                 </button>
             </div>
             }
-            {(gameState === GameState.gameInit ||
-                gameState === GameState.playing ||
-                gameState === GameState.create
-            ) && boardData && gameId &&
+            {   (gameState === GameState.playing
+                || gameState === GameState.create
+                || gameState === GameState.lobby) 
+                && boardData && gameId &&
             <Fragment>
                 <h2>Play Board</h2>
                 <div className="App">

@@ -4,7 +4,7 @@ import React, {useState, useEffect} from "react";
 
 export interface props {
     start: boolean;
-    onEnded?: () => void
+    onEnded?: (n:string) => void
 }
 
 export interface state {
@@ -19,7 +19,7 @@ const Timer = (props: props) => {
     useEffect(() => {
         if (!props.start) {
             if(props.onEnded && time ){
-                props.onEnded();
+                props.onEnded(getTimeDelta(time));
             }
             return;
         }
