@@ -6,5 +6,6 @@
 }
 
 .preview .board-row {
-    height: 30px;
+    margin: 2px;
+    height: 24px;
 } 

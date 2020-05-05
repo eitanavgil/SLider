@@ -1,5 +1,6 @@
-import firebase from "firebase/app";
 import "firebase/firestore";
+import {GameState} from "../App";
+import firebase from "firebase/app";
 import {boardItemData} from "../components/boards/Board/Board";
 
 export class FirebaseService {
@@ -7,48 +8,61 @@ export class FirebaseService {
     db: firebase.firestore.Firestore | undefined;
 
     constructor() {
-        const firebaseConfig = {
-
-        };
+        const firebaseConfig = {};
         firebase.initializeApp(firebaseConfig);
         this.db = firebase.firestore();
         // debug helper - TODO - remove
         (window as any).db = this.db
     }
 
-    public addUserToGame = (user: string, game: number, callback: (o: any) => void) => {
+    public listenToNames = (gameId: number, callback: (o: any) => void) => {
+        this.db!.collection('games')
+            .onSnapshot((snapshot) => {
+                let changes = snapshot.docChanges();
+                changes.forEach(change => {
+                    if (change.doc && change.doc.data() && change.doc.data().gameId && change.doc.data().gameId !== gameId.toString()) {
+                        return
+                    }
+                    if (change.type === "added") {
+                        if (change.doc.data().gameId === gameId.toString()) {
+                            callback({names: change.doc.data().names})
+                        }
+                    }
+                    if (change.type === "modified") {
+                        if (change.doc.data().gameId === gameId.toString()) {
+                            callback({names: change.doc.data().names})
+                        }
+                    }
 
+                })
+            })
+    }
+
+    public addUserToGame = (user: string, game: number, callback: (o: any) => void) => {
         if (!this.db) {
             return
         }
+        let namesRef = game.toString()
+        this.db.collection('games')
+            .doc(game.toString())
+            .get()
+            .then((snapshot) => {
+                let currentAr = (snapshot.data() as any).names as [];
+                // @ts-ignore
+                if (currentAr.find(item => item.name === user)) {
+                    alert("Existing user")
+                    return;
+                }
+                // @ts-ignore
+                currentAr.push({name: user, score: 0});
+                this.db!.collection('games')
+                    .doc(game.toString())
+                    .update({names: currentAr})
+                    .then(snapshot => {
+                        this.getGameById(game, callback)
+                    })
 
-        let namesRef =
-            this.db.collection('games')
-                .doc(game.toString())
-                .get()
-                .then((snapshot) => {
-                    let currentAr = (snapshot.data() as any).names as [];
-                    // @ts-ignore
-                    if (currentAr.find(item => item.name === user)) {
-                        alert("Existing user")
-                        return;
-                    }
-                    // @ts-ignore
-                    currentAr.push({name: user, score: 0});
-                    this.db!.collection('games')
-                        .doc(game.toString())
-                        .update({names: currentAr})
-                        .then(snapshot => {
-                            this.getGameById(game, callback)
-                        })
-                    this.db!.collection('games')
-                        .onSnapshot((snapshot) => {
-                            let changes = snapshot.docChanges();
-                            changes.forEach(change => {
-                                console.log(">>>> change.type", change.type)
-                            })
-                        })
-                })
+            })
     }
 
 
@@ -100,14 +114,19 @@ export class FirebaseService {
                 callbackF({message: "Error"})
             })
     }
+    // admin switch from lobby to playing - releasing the lobby UI 
     public startGame = (gameId: number) => {
         if (!this.db) {
             return
         }
-        this.db.collection("games").doc(gameId.toString()).update({status: "started"})
+        this.db.collection("games").doc(gameId.toString()).update({status: GameState.playing})
     }
-    public endGame = (gameId: number) => {
 
+    public endGame = (gameId: number) => {
+        if (!this.db) {
+            return
+        }
+        this.db.collection("games").doc(gameId.toString()).update({status: GameState.end})
     }
 
     public createGame = (target: boardItemData[][], scrambled: boardItemData[][], callback: (v: any) => void) => {
@@ -122,7 +141,8 @@ export class FirebaseService {
             }
 
             this.db.collection("games").doc(latest.toString()).set({
-                status: "init",
+                gameId: latest.toString(),
+                status: GameState.lobby,
                 names: [],
                 scrambled: JSON.stringify(scrambled),
                 target: JSON.stringify(target)

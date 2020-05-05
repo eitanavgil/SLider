@@ -1,47 +1,27 @@
 import "./App.css";
-import {convertToBoardData} from "./utils/logic";
+import {convertToBoardData, generateBoard} from "./utils/logic";
 import Board, {boardItemData} from "./components/boards/Board/Board";
 import React, {Fragment, useEffect, useState, useRef} from "react";
 import Timer from "./components/Timer/Timer";
 import {printBoard, shuffleArray} from "./utils/Utils";
 import {FirebaseService} from "./utils/firebaseService";
 import Lobby from "./components/Lobby/Lobby";
-
-const board1: number[][] = [
-    [4, 5, 1],
-    [2, 0, 3],
-    [3, 1, 4],
-];
-
-const board2: number[][] = [
-    [4, 5, 1, 2, 4],
-    [2, 0, 3, 4, 3],
-    [4, 1, 2, 5, 2],
-    [3, 5, 3, 1, 4],
-];
-const board3: number[][] = [
-    [2, 0, 3, 4],
-    [3, 5, 3, 1],
-    [4, 5, 1, 2],
-];
-const board4: number[][] = [
-    [2, 0, 3],
-    [2, 2, 3],
-    [2, 2, 3],
-];
-const board5: number[][] = [
-    [3, 0, 3],
-    [2, 2, 3],
-
-];
+import GameOptions, {gameOptions} from "./components/GameOptions/GameOptions";
+import ScoreBoard from "./components/boards/ScoreBoard/ScoreBoard";
 
 export enum GameState {
     "init" = "init",
     "join" = "join",
     "create" = "create",
+    "push" = "push",
     "lobby" = "lobby",
     "playing" = "playing",
     "end" = "end",
+}
+
+export enum UserTypes {
+    "admin" = "admin",
+    "player" = "player",
 }
 
 export interface gameData {
@@ -52,118 +32,179 @@ export interface gameData {
 let fb: FirebaseService
 
 function App() {
-
-    const gameInput = useRef(null);
-    const nameInput = useRef(null);
     const [boardData, setBoardData] = useState<gameData>();
     const [timerStarted, setTimerStarted] = useState(false);
     const [gameState, setGameState] = useState(GameState.init);
-    const [gameId, setGameId] = useState(1);
+    const [gameId, setGameId] = useState();
+    const [userType, setUserType] = useState<UserTypes>(UserTypes.player);
     const [user, setUser] = useState();
-    const [time, SetTime] = useState();
+    const [users, setUsers] = useState<[]>();
 
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const myGame = urlParams.get('game');
+        const admin = urlParams.get('admin');
+        if (admin) {
+            setUserType(UserTypes.admin);
+        }
         if (gameState === GameState.init) {
             fb = new FirebaseService();
+            if (myGame) {
+                setGameId(parseInt(myGame))
+                setGameState(GameState.join);
+            } else if (admin) {
+                setGameState(GameState.create);
+            }
         }
         if (gameState === GameState.end) {
+            console.log(">>>> ENDED")
+        }
+        if (gameState === GameState.push) {
+
+            fb.createGame(boardData!.target!, boardData!.scrambled!, (gameId) => {
+                    setGameId(gameId);
+                    setGameState(GameState.playing);
+                    listenToNamesUpdates(gameId);
+                }
+            );
         }
         if (gameState === GameState.create) {
-            const myBoard = board5;
-            setBoardData({
-                target: (convertToBoardData(myBoard)),
-                scrambled: (shuffleArray(convertToBoardData(myBoard)))
-            })
-            fb.createGame(convertToBoardData(myBoard), shuffleArray(convertToBoardData(myBoard)), (gameId) => {
-                setGameId(gameId);
-            });
+
         }
     }, [gameState]);
 
-
+    const saveGame = (gameOptions: gameOptions) => {
+        if(gameOptions.colors > 5 || gameOptions.x >5 || gameOptions.y >5){
+            alert("Respect max 5")
+            return
+        }
+        const newBoard = generateBoard({
+            x: gameOptions.x,
+            y: gameOptions.y,
+        }, gameOptions.colors)
+        setBoardData({
+            target: (convertToBoardData(newBoard)),
+            scrambled: (shuffleArray(convertToBoardData(newBoard)))
+        })
+        setGameState(GameState.push);
+    }
     const startGame = () => {
         fb.startGame(gameId);
     }
+
     const setTimerEnded = (time: string) => {
         fb.submitScore(user, gameId, time)
     }
     const endGame = () => {
         fb.endGame(gameId);
     }
-    const join = () => {
 
-        if (gameInput && (gameInput.current as any).value && (nameInput.current as any).value && fb) {
+    const listenToNamesUpdates = (gameId: number) => {
+        fb.listenToNames(gameId, (data: any) => {
+            if (data && data.names) {
+                setUsers(data.names);
+            }
+        })
+    }
+
+    const join = () => {
+        if (gameId && user && fb) {
             if (!fb) {
                 return;
             }
-
-            setUser((nameInput.current as any).value);
-            setGameId((gameInput.current as any).value);
-
             // add user
-            fb.addUserToGame((nameInput.current as any).value, (gameInput.current as any).value, (data: any) => {
+            fb.addUserToGame(user, gameId, (data: any) => {
                 if (data.message) {
+                    // TODO - convert to text on screen to the user
                     alert(data.message);
                     return;
                 }
-                // @ts-ignore
-                setBoardData({
-                    target: (data.target as boardItemData[][]),
-                    scrambled: (data.scrambled as boardItemData[][])
-                })
-                setGameState(GameState.lobby);
+                if (data.target) {
+                    setBoardData({
+                        target: (data.target as boardItemData[][]),
+                        scrambled: (data.scrambled as boardItemData[][])
+                    })
+                    setGameState(GameState.playing);
+                    listenToNamesUpdates(gameId);
+                }
+
             })
 
         } else {
-            alert("Bot fields are mandatory")
+            // TODO - convert to text on screen to the user
+            if (!gameId) {
+                alert("Both fields are mandatory")
+            }
         }
+    }
+
+    const setAdminMode = () => {
+        setUserType(UserTypes.admin);
+        setGameState(GameState.create);
     }
 
     return (
         <Fragment>
             <Timer start={timerStarted} onEnded={(v) => setTimerEnded(v)}/>
+            {/********************************   INIT  **************************/}
             {gameState === GameState.init &&
             <div className="game-options">
                 <h2>What would you like to do?</h2>
                 <button onClick={() => setGameState(GameState.join)}
                         className={"game-action"}>Join A Game?
                 </button>
-                <button onClick={() => setGameState(GameState.create)}
+                <button onClick={setAdminMode}
                         className={"game-action"}>Host A Game?
                 </button>
             </div>
             }
+            {/********************************   LOBBY  **************************/}
             {gameState === GameState.lobby &&
             <Lobby/>
             }
 
+            {/********************************   END   **************************/}
             {gameState === GameState.end &&
             <Fragment>
                 <h2>YEY</h2>
                 <h2>Submitting your Score !</h2>
+                {users &&
+                <ScoreBoard data={users}></ScoreBoard>
+                }
             </Fragment>
             }
+            {/********************************   JOIN   **************************/}
             {gameState === GameState.join &&
             <div className="game-options">
-                <input type="number" className="join-input" value={gameId}
-                       ref={gameInput} placeholder={"Game Id"}/>
+
+                <input type="number" className="join-input"
+                       value={gameId}
+                       onBlur={(e) => setGameId(parseInt(e.target.value))}
+                       placeholder={"Game Id"}/>
+
+
                 <input type="text" className="join-input"
-                       ref={nameInput} placeholder={"Name"}/>
+                       onChange={(e) => setUser(e.target.value)}
+                       placeholder={"Name"}/>
                 <button onClick={(e) => join()}
                         className={"game-action"}>JOIN
                 </button>
             </div>
             }
-            {   (gameState === GameState.playing
-                || gameState === GameState.create
-                || gameState === GameState.lobby) 
-                && boardData && gameId &&
+            {gameState === GameState.create &&
+            <GameOptions onOptionsSet={(data) => saveGame(data)}></GameOptions>
+            }
+
+
+            {/*******************************  PLAYING / CREATE / LOBBY *************************/}
+            {(gameState === GameState.playing
+                || gameState === GameState.lobby)
+            && boardData && gameId &&
             <Fragment>
-                <h2>Play Board</h2>
+                <h3>Play Board</h3>
                 <div className="App">
                     {gameId && <h3>{`Game Id:${gameId}`}</h3>}
-                    {boardData &&
                     <Board boardData={boardData} interactive={true}
                            onStarted={() => {
                                setTimerStarted(true);
@@ -173,22 +214,19 @@ function App() {
                                setGameState(GameState.end)
                            }}
                     />
-                    }
+                    <h3>Target Board</h3>
+                    <Board boardData={boardData} interactive={false}></Board>
                 </div>
                 <div>
-                    {boardData &&
+                    {userType === UserTypes.admin &&
                     <Fragment>
-                        <h2>Target Board</h2>
-                        <Board boardData={boardData} interactive={false}></Board>
-                    </Fragment>
-                    }
-                    {gameState === GameState.create &&
-                    <Fragment>
+                        {users &&
+                        <ScoreBoard data={users}></ScoreBoard>
+                        } {/*<button className="control-button save-game" onClick={saveGame}>save t game</button>*/}
                         <button className="control-button start-game" onClick={startGame}>Start Game To All</button>
                         <button className="control-button end-game" onClick={endGame}>End Game To All</button>
                     </Fragment>
                     }
-
                 </div>
             </Fragment>
             }

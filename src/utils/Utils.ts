@@ -22,7 +22,7 @@ export function moveRandomOnce(board: boardItemData[][]): boardItemData[][] {
 export const shuffleArray = (board: boardItemData[][]): boardItemData[][] => {
     // flat array and shuffle 
     let copy = cloneDeep(board);
-    const shuffleVolume = 41;
+    const shuffleVolume = 50;
     for (var i = 0; i < shuffleVolume; i++) {
         copy = moveRandomOnce(copy)
     }

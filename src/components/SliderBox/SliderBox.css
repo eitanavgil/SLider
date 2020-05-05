@@ -6,6 +6,7 @@
 }
 
 .slider-box {
+    border-radius: 4px;
     width: 64px;
     height: 64px;
     display: inline-block;
@@ -43,6 +44,8 @@
 }
 
 .preview .slider-box {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
+    margin: 1px;
+    border-radius: 2px;
 }

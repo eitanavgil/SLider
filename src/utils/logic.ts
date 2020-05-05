@@ -153,7 +153,23 @@ export const getZeroItem = (board: boardItemData[][]): boardItemData | null => {
     }
     return null;
 }
+export const generateBoard = (sizes: coordinates, colors: number): number[][] => {
+    let board = new Array()
+    for (let y = 0; y < sizes.y; y++) {
+        const row = new Array()
+        for (let x = 0; x < sizes.x; x++) {
+            row.push(getRandomInt(colors) + 1)
+        }
+        board.push(row);
+    }
+    // handle 0 
+    board[getRandomInt(sizes.y)][getRandomInt(sizes.x)] = 0;
+    return board
+}
 
+export const getRandomInt = (max: number) => {
+    return Math.floor(Math.random() * Math.floor(max));
+}
 
 export const getCoordinatesByItem = (board: boardItemData[][], item: boardItemData) => {
     for (let y = 0; y < board.length; y++) {
@@ -263,7 +279,7 @@ export const multiMove = (board: boardItemData[][], item: boardItemData, zeroCoo
                     // replaceItems(copy, zeroItem, itemsToLeft[i]);
                 }
             }
-            
+
             return fillRestrictions(copy);
             break;
         // item is right to empty
