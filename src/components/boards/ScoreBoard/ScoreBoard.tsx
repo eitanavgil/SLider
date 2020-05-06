@@ -15,7 +15,7 @@ const ScoreBoard = (props: props) => {
         {props.data && props.data.length &&
         <div>
 
-            <table>
+            <table className={"score-table"}>
                 <thead>
                 <tr>
                     <th>Name</th>
