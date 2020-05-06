@@ -1,9 +1,9 @@
 import "./App.css";
 import { convertToBoardData, generateBoard } from "./utils/logic";
 import Board, { boardItemData } from "./components/boards/Board/Board";
-import React, { Fragment, useEffect, useState, useRef } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import Timer from "./components/Timer/Timer";
-import { printBoard, shuffleArray } from "./utils/Utils";
+import { shuffleArray } from "./utils/Utils";
 import { FirebaseService } from "./utils/firebaseService";
 import Lobby from "./components/Lobby/Lobby";
 import GameOptions, { gameOptions } from "./components/GameOptions/GameOptions";
@@ -32,8 +32,6 @@ export interface gameData {
 let fb: FirebaseService;
 
 function App() {
-  const qr = useRef<HTMLImageElement>(null);
-
   const [errorMessage, setErrorMessage] = useState<string>();
   const [boardData, setBoardData] = useState<gameData>();
   const [timerStarted, setTimerStarted] = useState(false);
@@ -42,6 +40,7 @@ function App() {
   const [userType, setUserType] = useState<UserTypes>(UserTypes.player);
   const [user, setUser] = useState();
   const [users, setUsers] = useState<[]>();
+  const [qrPreview, setQrPreview] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -70,6 +69,11 @@ function App() {
       });
     }
     if (gameState === GameState.create) {
+    }
+    if (gameState === GameState.playing) {
+      if (userType === UserTypes.admin) {
+        setQrPreview(true);
+      }
     }
   }, [gameState]);
 
@@ -102,10 +106,6 @@ function App() {
 
   const startGame = () => {
     fb.startGame(gameId);
-  };
-
-  const hideImage = () => {
-    qr.current!.style.display = "none";
   };
 
   const setTimerEnded = (time: string) => {
@@ -254,12 +254,15 @@ function App() {
                   <button className="control-button end-game" onClick={endGame}>
                     End Game To All
                   </button>
-                  <img
-                    className="qr-code"
-                    onClick={hideImage}
-                    ref={qr}
-                    src={`https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}&choe=UTF-8`}
-                  ></img>
+                  {qrPreview && gameId && (
+                    <img
+                      className="qr-code"
+                      onClick={() => {
+                        setQrPreview(false);
+                      }}
+                      src={`https://chart.googleapis.com/chart?chs=400x400&cht=qr&chl=http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}&choe=UTF-8`}
+                    />
+                  )}
                 </Fragment>
               )}
             </div>

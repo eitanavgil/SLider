@@ -82,3 +82,11 @@ a {
 h2, h3 {
     margin-top: 4px;
 }
+
+.qr-code {
+    position: fixed; /* or absolute */
+    top: 50%;
+    left: 50%;
+    margin-top: -200px;
+    margin-left: -200px;
+}
