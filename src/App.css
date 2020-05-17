@@ -1,6 +1,8 @@
 .App {
     text-align: center;
-    background-color: #112525;
+    background-color: #1e2970;
+    max-width: 700px;
+    border-radius: 24px;
 }
 
 .App-logo {
@@ -15,7 +17,7 @@
 }
 
 .App-header {
-    background-color: #282c34;
+    background-color: #36399a;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -89,4 +91,7 @@ h2, h3 {
     left: 50%;
     margin-top: -200px;
     margin-left: -200px;
+}
+.board-separator{
+height: 40px
 }

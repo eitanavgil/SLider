@@ -158,117 +158,122 @@ function App() {
   };
 
   return (
-    <Fragment>
-      <Timer start={timerStarted} onEnded={(v) => setTimerEnded(v)} />
-      {userType === UserTypes.admin && gameId && (
-        <a
-          href={`http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}`}
-        >
-          {`http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}`}
-        </a>
-      )}
-      {/********************************   INIT  **************************/}
-      {gameState === GameState.init && (
-        <div className="game-options">
-          <h2>What would you like to do?</h2>
-          <button
-            onClick={() => setGameState(GameState.join)}
-            className={"game-action"}
+    <div className={"app-body"}>
+      <div className={"app-body"}>
+        <Timer start={timerStarted} onEnded={(v) => setTimerEnded(v)} />
+        {userType === UserTypes.admin && gameId && (
+          <a
+            href={`http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}`}
           >
-            Join A Game?
-          </button>
-          <button onClick={setAdminMode} className={"game-action"}>
-            Host A Game?
-          </button>
-        </div>
-      )}
-      {/********************************   LOBBY  **************************/}
-      {gameState === GameState.lobby && <Lobby />}
+            {`http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}`}
+          </a>
+        )}
+        {/********************************   INIT  **************************/}
+        {gameState === GameState.init && (
+          <div className="game-options">
+            <h2>What would you like to do?</h2>
+            <button
+              onClick={() => setGameState(GameState.join)}
+              className={"game-action"}
+            >
+              Join A Game?
+            </button>
+            <button onClick={setAdminMode} className={"game-action"}>
+              Host A Game?
+            </button>
+          </div>
+        )}
+        {/********************************   LOBBY  **************************/}
+        {gameState === GameState.lobby && <Lobby />}
 
-      {/********************************   END   **************************/}
-      {gameState === GameState.end && (
-        <Fragment>
-          <h2>YEY</h2>
-          <h2>Submitting your Score !</h2>
-          {users && <ScoreBoard data={users}></ScoreBoard>}
-        </Fragment>
-      )}
-      {/********************************   JOIN   **************************/}
-      {gameState === GameState.join && (
-        <div className="game-options">
-          <input
-            type="number"
-            className="join-input"
-            value={gameId}
-            onBlur={(e) => setGameId(parseInt(e.target.value))}
-            placeholder={"Game Id"}
-          />
-          <input
-            type="text"
-            className="join-input"
-            onChange={(e) => setUser(e.target.value)}
-            placeholder={"Name"}
-          />
-          <button onClick={(e) => join()} className={"game-action"}>
-            JOIN
-          </button>
-        </div>
-      )}
-      {gameState === GameState.create && (
-        <GameOptions onOptionsSet={(data) => saveGame(data)}></GameOptions>
-      )}
-
-      {/*******************************  PLAYING / CREATE / LOBBY *************************/}
-      {(gameState === GameState.playing || gameState === GameState.lobby) &&
-        boardData &&
-        gameId && (
+        {/********************************   END   **************************/}
+        {gameState === GameState.end && (
           <Fragment>
-            <h3>Play Board</h3>
-            <div className="App">
-              {gameId && <h3>{`Game Id:${gameId}`}</h3>}
-              <Board
-                boardData={boardData}
-                interactive={true}
-                onStarted={() => {
-                  setTimerStarted(true);
-                }}
-                onEnded={() => {
-                  setTimerStarted(false);
-                  setGameState(GameState.end);
-                }}
-              />
-              <h3>Target Board</h3>
-              <Board boardData={boardData} interactive={false}></Board>
-            </div>
-            <div>
-              {userType === UserTypes.admin && (
-                <Fragment>
-                  {users && <ScoreBoard data={users}></ScoreBoard>}{" "}
-                  {/*<button className="control-button save-game" onClick={saveGame}>save t game</button>*/}
-                  <button
-                    className="control-button start-game"
-                    onClick={startGame}
-                  >
-                    Start Game To All
-                  </button>
-                  <button className="control-button end-game" onClick={endGame}>
-                    End Game To All
-                  </button>
-                  {qrPreview && gameId && (
-                    <img
-                      className="qr-code"
-                      onClick={() => {
-                        setQrPreview(false);
-                      }}
-                      src={`https://chart.googleapis.com/chart?chs=400x400&cht=qr&chl=http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}&choe=UTF-8`}
-                    />
-                  )}
-                </Fragment>
-              )}
-            </div>
+            <h2>YEY</h2>
+            <h2>Submitting your Score !</h2>
+            {users && <ScoreBoard data={users}></ScoreBoard>}
           </Fragment>
         )}
-    </Fragment>
+        {/********************************   JOIN   **************************/}
+        {gameState === GameState.join && (
+          <div className="game-options">
+            <input
+              type="number"
+              className="join-input"
+              value={gameId}
+              onBlur={(e) => setGameId(parseInt(e.target.value))}
+              placeholder={"Game Id"}
+            />
+            <input
+              type="text"
+              className="join-input"
+              onChange={(e) => setUser(e.target.value)}
+              placeholder={"Name"}
+            />
+            <button onClick={(e) => join()} className={"game-action"}>
+              JOIN
+            </button>
+          </div>
+        )}
+        {gameState === GameState.create && (
+          <GameOptions onOptionsSet={(data) => saveGame(data)}></GameOptions>
+        )}
+
+        {/*******************************  PLAYING / CREATE / LOBBY *************************/}
+        {(gameState === GameState.playing || gameState === GameState.lobby) &&
+          boardData &&
+          gameId && (
+            <Fragment>
+              <div className="App">
+                <div className="board-separator" />
+                <Board
+                  boardData={boardData}
+                  interactive={true}
+                  onStarted={() => {
+                    setTimerStarted(true);
+                  }}
+                  onEnded={() => {
+                    setTimerStarted(false);
+                    setGameState(GameState.end);
+                  }}
+                />
+                <div className="board-separator" />
+                <Board boardData={boardData} interactive={false}></Board>
+                <div className="board-separator" />
+              </div>
+              <div>
+                {userType === UserTypes.admin && (
+                  <Fragment>
+                    {users && <ScoreBoard data={users}></ScoreBoard>}{" "}
+                    {/*<button className="control-button save-game" onClick={saveGame}>save t game</button>*/}
+                    <button
+                      className="control-button start-game"
+                      onClick={startGame}
+                    >
+                      Start Game To All
+                    </button>
+                    <button
+                      className="control-button end-game"
+                      onClick={endGame}
+                    >
+                      End Game To All
+                    </button>
+                    {qrPreview && gameId && (
+                      <img
+                        className="qr-code"
+                        onClick={() => {
+                          setQrPreview(false);
+                        }}
+                        src={`https://chart.googleapis.com/chart?chs=400x400&cht=qr&chl=http://projects.kaltura.com/eitan/slider/index.html?game=${gameId}&choe=UTF-8`}
+                      />
+                    )}
+                  </Fragment>
+                )}
+              </div>
+            </Fragment>
+          )}
+      </div>
+    </div>
   );
 }
 

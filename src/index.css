@@ -4,11 +4,17 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #112525;
+  background-color: #36399a;
   color: darkgray;
   text-align: center;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.root{
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
