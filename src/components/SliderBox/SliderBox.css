@@ -1,51 +1,44 @@
 @media only screen and (max-width: 200px) {
-    .slider-box {
-        width: 64px;
-        height: 64px;
-    }
+  .slider-box {
+    width: 64px;
+    height: 64px;
+  }
 }
 
 .slider-box {
-    border-radius: 4px;
-    width: 64px;
-    height: 64px;
-    display: inline-block;
-    margin: 2px;
+  border-radius: 4px;
+  width: 64px;
+  height: 64px;
+  display: inline-block;
+  margin: 2px;
 }
 
 .slide-inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .c0 {
-    background-color: #36399a;
+  background-color: #091b4b;
 }
 
 .c1 {
-    background-color: #fed42f;
+  background-color: #fed42f;
 }
 
 .c2 {
-    background-color: #e72a6d;
+  background-color: #e72a6d;
 }
 
 .c3 {
-    background-color: #72c9db;
+  background-color: #72c9db;
 }
 
 .c4 {
-    background-color: #009b48;
+  background-color: #009b48;
 }
 
 .c5 {
-    background-color: #b71234;
-}
-
-.preview .slider-box {
-    width: 24px;
-    height: 24px;
-    margin: 1px;
-    border-radius: 2px;
+  background-color: #b71234;
 }

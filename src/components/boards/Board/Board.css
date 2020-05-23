@@ -1,11 +1,29 @@
 .board-row {
-    margin: 0;
-    padding: 0;
-    height: 64px;
-    margin: 4px;
+  margin: 0;
+  padding: 0;
+  height: 64px;
+  margin: 4px;
 }
 
 .preview .board-row {
-    margin: 2px;
-    height: 24px;
-} 
+  margin: 4px;
+  height: 20px;
+}
+
+.board {
+  background: #091b4b;
+  display: inline-block;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.preview .slider-box {
+  width: 20px;
+  height: 20px;
+  margin: 2px;
+  border-radius: 2px;
+}
+
+.preview.board {
+  padding: 8px;
+}

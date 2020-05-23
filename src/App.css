@@ -1,97 +1,61 @@
 .App {
-    text-align: center;
-    background-color: #1e2970;
-    max-width: 700px;
-    border-radius: 24px;
+  text-align: center;
+  background-color: #1e2970;
+  max-width: 700px;
+  border-radius: 24px;
 }
 
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/** TODO  REMOVE **/
+nav {
+  position: absolute;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.main,
+.router-body {
+  height: 100%;
 }
 
-.App-header {
-    background-color: #36399a;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.router-body {
+  display: flex;
+  width: 100%;
+  background: #36399a;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.router-body .inner-router {
+  background: #1e2a70;
+  width: 100%;
+  flex: 1;
+  margin-right: auto;
+  margin-left: auto;
+  border-radius: 24px;
+  max-width: 500px;
+  max-height: 80%;
 }
 
-.App-link {
-    color: #61dafb;
+.player-button {
+  outline: 0;
+  display: inline-block;
+  margin-top: 20px;
+  padding: 6px 10px;
+  background: #e72a6d;
+  font-size: 1.4em;
+  max-width: 120px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 4px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+.player-button:disabled {
+  background: rgba(231, 42, 109, 0.8);
+  color: darkgray;
+  cursor: default;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.game-options {
-    display: block;
-    align-items: center;
-    justify-content: center;
-    padding-top: 16px
-}
-
-.join-input {
-    display: block;
-    font-size: x-large;
-    margin: 0 auto;
-    margin-top: 16px;
-    margin-bottom: 16px;
-}
-
-.game-action {
-    margin: 0 auto;
-    color: #a9a9a9;
-    font-size: x-large;
-    margin: 16px;
-}
-
-.control-button,
-.shuffle-button {
-    margin-top: 16px;
-    color: #a9a9a9;
-    background: #0046ad;
-    border: none;
-}
-
-.settings-input,
-.control-button {
-    display: block;
-    margin: 0 auto;
-    margin-top: 16px;
-}
-
-a {
-    color: #61dafb !important;
-}
-
-h2, h3 {
-    margin-top: 4px;
-}
-
-.qr-code {
-    position: fixed; /* or absolute */
-    top: 50%;
-    left: 50%;
-    margin-top: -200px;
-    margin-left: -200px;
-}
-.board-separator{
-height: 40px
+.spacer {
+  display: inline-block;
+  min-width: 16px;
 }

@@ -373,7 +373,6 @@ export const replaceItems = (
 ) => {
   const tmp1 = cloneDeep(item1);
   const tmp2 = cloneDeep(item2);
-  debugger;
   item1.x = tmp2.x;
   item1.y = tmp2.y;
   item1.value = tmp2.value;

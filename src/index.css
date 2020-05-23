@@ -8,6 +8,9 @@ body {
   color: darkgray;
   text-align: center;
 }
+body, html,#root {
+  height: 100%;
+}
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;

@@ -9,11 +9,10 @@ import {
 } from "../../../utils/logic";
 import { directions, printBoard, shuffleArray } from "../../../utils/Utils";
 import "./Board.css";
-import { gameData } from "../../../App";
 
 export interface props {
   gameMode?: GameMode;
-  boardData: gameData;
+  boardData: any;
   interactive?: Boolean;
   onEnded?: () => void;
   onStarted?: () => void;
@@ -49,8 +48,8 @@ const Board = (props: props) => {
     let board = makeMove(boardData, item, props.gameMode);
     board = resetRestrictions(board);
     setBoardData(fillRestrictions(board, props.gameMode));
-
-    if (check(board, props.boardData.target!)) {
+    // todo - optimize later
+    if (check(board, JSON.parse(props.boardData.target!))) {
       setTimeout(() => {
         if (props.onEnded) {
           props.onEnded();
@@ -60,12 +59,24 @@ const Board = (props: props) => {
   };
 
   useEffect(() => {
+    let boardDataLocal = props.boardData;
+    if (!boardDataLocal) {
+      return;
+    }
     if (props.interactive && props.boardData.target) {
-      let newBoard = cloneDeep(props.boardData.scrambled);
+      let data = props.boardData.scrambled;
+      if (typeof data === "string") {
+        data = JSON.parse(props.boardData.scrambled);
+      }
+      let newBoard = cloneDeep(data);
       newBoard = fillRestrictions(newBoard!, props.gameMode);
       setBoardData(newBoard);
     } else {
-      let newBoard = cloneDeep(props.boardData.target);
+      let data = props.boardData.target;
+      if (typeof data === "string") {
+        data = JSON.parse(props.boardData.target);
+      }
+      let newBoard = cloneDeep(data);
       newBoard = fillRestrictions(newBoard!, props.gameMode);
       setBoardData(newBoard);
     }
@@ -73,7 +84,7 @@ const Board = (props: props) => {
 
   // @ts-ignore
   return (
-    <div className={props.interactive ? "interactive" : "preview"}>
+    <div className={props.interactive ? "interactive board" : "preview board"}>
       {boardData &&
         boardData.map((row: [], i: number) => (
           <div key={i} className={"board-row"}>
