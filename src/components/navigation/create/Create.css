@@ -1,4 +1,18 @@
 .timer {
-    text-align: center;
-    min-height: 20px;
+  text-align: center;
+  min-height: 20px;
+}
+
+.upload-button {
+  margin-left: 24px;
+}
+
+a,
+a:visited {
+  color: #009b48;
+  margin-left: 16px;
+}
+
+.h2.title {
+  margin-bottom: 8px;
 }

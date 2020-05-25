@@ -1,4 +1,5 @@
 import React, { Fragment, useState } from "react";
+import "./PlayersBoard.css";
 
 export interface playerData {
   name?: string;
@@ -11,13 +12,24 @@ export interface playersBoardProps {
 function PlayersBoard(props: playersBoardProps) {
   return (
     <Fragment>
-      {props.players &&
-        props.players &&
-        props.players.length &&
-        props.players.map((line: any, i: number) => (
-          <div key={i}>{line.name}</div>
-        ))}
-      {!props.players && <span>BBB</span>}
+      <div className="players-table">
+        {console.log(">>>> ss", props.players)}
+        {props.players &&
+          props.players &&
+          props.players.length > 1 &&
+          props.players.map((line: any, i: number) => {
+            if (i === 0) {
+              return null;
+            }
+            return (
+              <div key={i} className="player-line">
+                <div className="player-line-item">{line.name}</div>
+                <div className="player-line-item">{line.score}</div>
+              </div>
+            );
+          })}
+      </div>
+      {!props.players && <span>No Players Yet</span>}
     </Fragment>
   );
 }

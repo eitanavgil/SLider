@@ -6,6 +6,7 @@ import Home from "./components/navigation/home/Home";
 import Create from "./components/navigation/create/Create";
 import Manage from "./components/navigation/manage/Manage";
 import Player from "./components/navigation/player/Player";
+import { FirebaseService } from "./utils/firebaseService";
 
 export enum GameState {
   "init" = "init",
@@ -17,7 +18,13 @@ export enum GameState {
   "end" = "end",
 }
 
+let fb: FirebaseService;
+
 function App() {
+  const [db, setDb] = useState();
+
+  useEffect(() => {}, []);
+
   return (
     <Router>
       <main className={"main"}>

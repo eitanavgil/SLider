@@ -23,6 +23,11 @@ const Play = (props: any) => {
   const [error, setError] = useState();
   const [gameData, setGameData] = useState();
 
+  const submitScore = (score: string) => {
+    setTimeout(() => {
+      fb.submitScore(userId, gameId, score);
+    }, 2000);
+  };
   const join = (evt: any) => {
     evt.preventDefault();
     // assume FB is ready
@@ -85,6 +90,9 @@ const Play = (props: any) => {
           <Fragment>
             {gameData.target && (
               <GameBoard
+                onDone={(score) => {
+                  submitScore(score);
+                }}
                 target={gameData.target}
                 scrambled={gameData.scrambled}
               />

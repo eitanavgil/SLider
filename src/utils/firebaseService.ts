@@ -7,10 +7,6 @@ export class FirebaseService {
   db: firebase.firestore.Firestore | undefined;
 
   constructor() {
-    if (this.db) {
-      return;
-    }
-
     const firebaseConfig = {};
     firebase.initializeApp(firebaseConfig);
     this.db = firebase.firestore();
@@ -18,15 +14,25 @@ export class FirebaseService {
     (window as any).db = this.db;
   }
   public listenToChange = (gameId: number, callback: (o: any) => void) => {
-    if (!this.db) {
+    if (!this.db || !gameId) {
       return;
     }
     this.db
-      .collection("games")
+      .collection(`games`)
       .doc(gameId.toString())
       .onSnapshot((snapshot) => {
         callback(snapshot.data());
       });
+  };
+
+  public listenToTableChange = (gameId: number, callback: (o: any) => void) => {
+    if (!this.db || !gameId) {
+      return;
+    }
+    this.db.collection(`games/${gameId}/players`).onSnapshot((snapshot) => {
+      const players = snapshot.docs.map((doc) => doc.data());
+      callback(players);
+    });
   };
 
   // public listenToNames = (gameId: number, callback: (o: any) => void) => {
@@ -59,38 +65,27 @@ export class FirebaseService {
   // };
 
   public addUserToGame = (user: string, game: number) => {
-    var promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       if (!this.db) {
         return;
       }
+      // todo - handle existing user collision
       let namesRef = game.toString();
       this.db
-        .collection("games")
-        .doc(game.toString())
-        .get()
-        .then((snapshot) => {
-          if (!snapshot || !snapshot.data() || !snapshot.data()!.names) {
-            reject({ error: "Wrong game number" });
-            return;
-          }
-          let currentAr = (snapshot.data() as any).names as [];
-          // @ts-ignore
-          if (currentAr.find((item) => item.name === user)) {
-            reject({ error: "User already exist" });
-            return;
-          }
-          const gameData = snapshot.data();
-          // @ts-ignore
-          currentAr.push({ name: user, score: 0 });
+        .collection(`games/${game}/players/`)
+        .doc(user)
+        .set({ name: user, score: "" })
+        .then(() => {
           this.db!.collection("games")
             .doc(game.toString())
-            .update({ names: currentAr })
+            .get()
             .then((snapshot) => {
+              const gameData = snapshot.data();
               resolve({ gameData });
+            })
+            .catch((e) => {
+              reject({ error: e });
             });
-        })
-        .catch(() => {
-          reject({ error: "Wrong game number" });
         });
     });
     return promise;
@@ -101,23 +96,10 @@ export class FirebaseService {
       return;
     }
     this.db
-      .collection("games")
-      .doc(gameId.toString())
-      .get()
-      .then((snapshot) => {
-        let names = (snapshot.data() as any).names as [];
-        const newNames = names.map((item: any) => {
-          if (item.name === name) {
-            item.score = score;
-          }
-          return item;
-        });
-        if (newNames.length) {
-          this.db!.collection("games").doc(gameId.toString()).update({
-            names: names,
-          });
-        }
-      });
+      .doc(`games/${gameId}/players/${name}`)
+      .update({ score: score.toString() });
+
+    // TODO - return promise
   };
 
   public getGameById = (gameId: number) => {
@@ -187,16 +169,33 @@ export class FirebaseService {
           if (!this.db) {
             return;
           }
+          // generate a new game
           this.db
             .collection("games")
             .doc(latest.toString())
             .set({
               gameId: latest.toString(),
               status: GameState.lobby,
-              names: [],
               scrambled: JSON.stringify(scrambled),
               target: JSON.stringify(target),
+            })
+            .then(() => {
+              var db = firebase.firestore();
+              var playersCollection = db
+                .collection("games")
+                .doc(latest + "")
+                .collection("players");
+              playersCollection
+                .doc("initiated-app")
+                .set({ admin: true })
+                .then(function () {
+                  console.log("Document Added ");
+                })
+                .catch(function (error) {
+                  console.error("Error adding document: ", error);
+                });
             });
+          // increase global index
           this.db
             .collection("games")
             .doc("latest")

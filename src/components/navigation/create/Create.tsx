@@ -5,12 +5,13 @@ import GameBoard from "../../boards/GameBoard/GameBoard";
 import { cloneDeep } from "lodash";
 import { FirebaseService } from "../../../utils/firebaseService";
 import { Redirect } from "react-router-dom";
+import "./Create.css";
 
 export const GameDifficulty = {
-  0: { dimensions: { x: 3, y: 3 }, colors: 2 },
-  1: { dimensions: { x: 4, y: 3 }, colors: 3 },
-  2: { dimensions: { x: 4, y: 4 }, colors: 4 },
-  3: { dimensions: { x: 5, y: 5 }, colors: 5 },
+  0: { index: 0, dimensions: { x: 3, y: 3 }, colors: 2, name: "Easy" },
+  1: { index: 1, dimensions: { x: 4, y: 3 }, colors: 3, name: "Normal" },
+  2: { index: 2, dimensions: { x: 4, y: 4 }, colors: 4, name: "Hard" },
+  3: { index: 3, dimensions: { x: 5, y: 5 }, colors: 5, name: "Hardest" },
 };
 
 let fb: FirebaseService;
@@ -19,7 +20,7 @@ let fb: FirebaseService;
 const Create = (props: any) => {
   const [gameId, setGameId] = useState();
   const [boardData, setBoardData] = useState();
-  const [difficultyIndex, setdDifficultyIndex] = useState(-1);
+  const [difficulty, setdDifficulty] = useState(GameDifficulty["0"]);
 
   useEffect(() => {
     const sp = new URLSearchParams(props.location.search);
@@ -29,20 +30,21 @@ const Create = (props: any) => {
 
   const upload = () => {
     fb.createGame(boardData.target, boardData.scrambled)
-      .then((gameid) => {
-        setGameId(gameid);
+      .then((gameId) => {
+        console.log(">>>> gameId", gameId);
+        setGameId(gameId);
       })
       .catch(() => {
         console.log(">>>> FAILED");
       });
   };
   const generate = () => {
-    let nextGame = difficultyIndex + 1;
-    if (nextGame === 4) {
-      nextGame = 0;
+    let nextGameIndex = difficulty.index + 1;
+    if (nextGameIndex === 4) {
+      nextGameIndex = 0;
     }
+    const selectedGameOptions = difficulty;
     // @ts-ignore
-    const selectedGameOptions = GameDifficulty[nextGame]!;
     const dimensions = selectedGameOptions.dimensions;
     const colors = selectedGameOptions.colors;
     const newBoard = generateBoard(dimensions, colors);
@@ -53,29 +55,40 @@ const Create = (props: any) => {
     setBoardData(null);
     setTimeout(() => {
       setBoardData(cloneDeep(gameData));
-      setdDifficultyIndex(nextGame);
+      // @ts-ignore
+      setdDifficulty(GameDifficulty[nextGameIndex.toString()]);
     }, 0);
   };
 
   return (
     <Fragment>
-      {gameId && <Redirect to={`/manage/?game=${gameId}`} />}
-
-      <h2>Create A New Game</h2>
+      {gameId && (
+        <a href={`/manage?game=${gameId}`} target="_blank">
+          Manage game: {gameId}
+        </a>
+      )}
+      {gameId && (
+        <a href={`/play?game=${gameId}`} target="_blank">
+          Play game {gameId}
+        </a>
+      )}
+      {/*{gameId && <Redirect to={`/manage/?game=${gameId}`} />}*/}
+      <h2 className={"h2 title"}>Create A New Game</h2>
       <button className={"player-button"} onClick={generate}>
-        Generate
+        {`Generate ${difficulty.name} Game`}
       </button>
-      <div className={"spacer"} />
       <button
         disabled={!boardData}
-        className={"player-button"}
+        className={"player-button upload-button"}
         onClick={upload}
       >
-        Upload
+        Upload !
       </button>
+      <div className={"spacer"} />
       {boardData && (
         <Fragment>
           <GameBoard
+            createMode={true}
             target={boardData.target}
             scrambled={boardData.scrambled}
           />

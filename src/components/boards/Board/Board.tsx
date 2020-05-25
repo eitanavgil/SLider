@@ -39,9 +39,10 @@ const defaultProps: props = {
 
 const Board = (props: props) => {
   const [boardData, setBoardData] = useState();
+  const [active, setActive] = useState(true);
 
   const nextMove = (item: boardItemData) => {
-    if (!props.interactive) {
+    if (!props.interactive || !active) {
       return; // make sure we are not changing the next
     }
     props.onStarted && props.onStarted();
@@ -52,6 +53,7 @@ const Board = (props: props) => {
     if (check(board, JSON.parse(props.boardData.target!))) {
       setTimeout(() => {
         if (props.onEnded) {
+          setActive(false);
           props.onEnded();
         }
       }, 50);

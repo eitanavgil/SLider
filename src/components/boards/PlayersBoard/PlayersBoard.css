@@ -1,0 +1,24 @@
+.players-table {
+  padding-top: 24px;
+  align-items: flex-start;
+  flex-flow: row nowrap;
+  min-height: 300px;
+}
+.player-line {
+  display: flex;
+  border: 1px solid #fed42f;
+  border-radius: 8px;
+  display: inline-block;
+  width: 40%;
+  margin: 8px;
+  text-align: left;
+}
+.player-line-item {
+  color: #fed42f;
+  font-size: 14px;
+  font-weight: bold;
+  display: inline-block;
+  min-width: 90px;
+  padding: 4px 4px;
+  text-align: left;
+}
