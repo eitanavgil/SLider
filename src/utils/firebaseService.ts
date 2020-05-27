@@ -69,8 +69,14 @@ export class FirebaseService {
       if (!this.db) {
         return;
       }
+      this.db
+        .doc(`games/${game}/players/${user}`)
+        .get()
+        .then((a) => {
+          console.log(">>>> THIS I Suser ", a.data());
+        });
+
       // todo - handle existing user collision
-      let namesRef = game.toString();
       this.db
         .collection(`games/${game}/players/`)
         .doc(user)

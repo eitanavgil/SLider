@@ -28,9 +28,6 @@ function GameBoard(props: gameData) {
       }
     }, 500);
   };
-  useRef();
-
-  const greeting = "Hello Function Component!";
   return (
     <Fragment>
       {!props.createMode && (

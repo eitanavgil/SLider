@@ -5,7 +5,6 @@ enum stateTypes {
   state2,
 }
 function Home() {
-  const [myState, setMyState] = useState<stateTypes>(stateTypes.state1);
   const greeting = "HOME";
   return <h1>{greeting}</h1>;
 }

@@ -1,3 +1,16 @@
 .h1.status {
   color: #009b48;
 }
+.qr-code {
+  margin-top: 24px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.copy-icon {
+  background-image: url("./assets/copy.svg");
+}
+
+.qr-icon {
+  margin-left: 24px;
+}

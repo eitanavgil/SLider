@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { cloneDeep, isEqual } from "lodash";
+import { cloneDeep } from "lodash";
 import SliderBox from "../../SliderBox/SliderBox";
 import {
   check,
@@ -7,7 +7,7 @@ import {
   makeMove,
   resetRestrictions,
 } from "../../../utils/logic";
-import { directions, printBoard, shuffleArray } from "../../../utils/Utils";
+import { directions } from "../../../utils/Utils";
 import "./Board.css";
 
 export interface props {

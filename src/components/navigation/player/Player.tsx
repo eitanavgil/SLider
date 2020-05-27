@@ -22,6 +22,7 @@ const Play = (props: any) => {
   const [userId, setUserId] = useState();
   const [error, setError] = useState();
   const [gameData, setGameData] = useState();
+  const [gamePlayers, setGamePlayers] = useState();
 
   const submitScore = (score: string) => {
     setTimeout(() => {
@@ -35,6 +36,9 @@ const Play = (props: any) => {
       .then((o: any) => {
         fb.listenToChange(gameId, (o: any) => {
           setGameData(o);
+        });
+        fb.listenToTableChange(gameId, (o: any) => {
+          setGamePlayers(o);
         });
       })
       .catch((e) => {
@@ -75,14 +79,21 @@ const Play = (props: any) => {
         {/********************** LOBBY MODE - WAIT FOR GAME START ***************************/}
         {gameData && gameData.status === GameState.lobby && (
           <div>
-            <h2>Hello {userId}</h2>
-            <h5>
+            <h1>Hello {userId}</h1>
+            <p className={"instructions"}>
               You are now in the lobby. We are waiting for your friends to join.
-              The game host should start the game soon.
-            </h5>
-            {gameData.names && (
-              <PlayersBoard players={gameData.names}></PlayersBoard>
-            )}
+              <h3>The game host should start the game soon.</h3>
+            </p>
+            <br />
+            <br />
+            <br />
+            <br />
+            <h4>Look who is playing this game:</h4>
+            <h4>
+              Ido - Shahaf - I would want to show an animation of how to play
+              here...
+            </h4>
+            {gamePlayers && <PlayersBoard players={gamePlayers}></PlayersBoard>}
           </div>
         )}
         {/********************** GAME MODE - Game is ready to play **************************/}

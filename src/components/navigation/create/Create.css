@@ -16,3 +16,10 @@ a:visited {
 .h2.title {
   margin-bottom: 8px;
 }
+
+.links-container{
+  position: absolute;
+  top : 0;
+  width: 500px;
+  text-align: center;
+}

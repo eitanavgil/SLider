@@ -40,3 +40,8 @@
   display: block;
   min-width: 150px;
 }
+
+.instructions {
+  padding-right: 10%;
+  padding-left: 10%;
+}

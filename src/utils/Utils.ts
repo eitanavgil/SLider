@@ -46,7 +46,6 @@ export const convertToBoardItems = (
   data: [][],
   index: number
 ): boardItemData[][] => {
-  const fill = [];
   data.forEach((line) => {
     line.forEach((item) => {
       const bi: boardItemData = { value: item, index: 1 };
@@ -76,6 +75,5 @@ export const msToTime = (s: number) => {
   let secs = s % 60;
   s = (s - secs) / 60;
   let mins = s % 60;
-  let hrs = (s - mins) / 60;
   return pad(mins) + ":" + pad(secs) + "." + pad(ms);
 };

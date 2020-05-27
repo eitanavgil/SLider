@@ -4,7 +4,6 @@ import { shuffleArray } from "../../../utils/Utils";
 import GameBoard from "../../boards/GameBoard/GameBoard";
 import { cloneDeep } from "lodash";
 import { FirebaseService } from "../../../utils/firebaseService";
-import { Redirect } from "react-router-dom";
 import "./Create.css";
 
 export const GameDifficulty = {
@@ -19,11 +18,17 @@ let fb: FirebaseService;
 // join a game by id or show generic board with an option to type the game id manually
 const Create = (props: any) => {
   const [gameId, setGameId] = useState();
+  const [tokenValid, setTokenValid] = useState(false);
   const [boardData, setBoardData] = useState();
   const [difficulty, setdDifficulty] = useState(GameDifficulty["0"]);
 
   useEffect(() => {
-    const sp = new URLSearchParams(props.location.search);
+    const urlSearchParams = new URLSearchParams(props.location.search);
+    const token = urlSearchParams.get("token");
+    if (!token || token.indexOf("BJ") === -1) {
+      return;
+    }
+    setTokenValid(true);
     // todo - handle authentication later
     fb = new FirebaseService();
   }, []);
@@ -31,7 +36,6 @@ const Create = (props: any) => {
   const upload = () => {
     fb.createGame(boardData.target, boardData.scrambled)
       .then((gameId) => {
-        console.log(">>>> gameId", gameId);
         setGameId(gameId);
       })
       .catch(() => {
@@ -62,36 +66,43 @@ const Create = (props: any) => {
 
   return (
     <Fragment>
-      {gameId && (
-        <a href={`/manage?game=${gameId}`} target="_blank">
-          Manage game: {gameId}
-        </a>
-      )}
-      {gameId && (
-        <a href={`/play?game=${gameId}`} target="_blank">
-          Play game {gameId}
-        </a>
-      )}
-      {/*{gameId && <Redirect to={`/manage/?game=${gameId}`} />}*/}
-      <h2 className={"h2 title"}>Create A New Game</h2>
-      <button className={"player-button"} onClick={generate}>
-        {`Generate ${difficulty.name} Game`}
-      </button>
-      <button
-        disabled={!boardData}
-        className={"player-button upload-button"}
-        onClick={upload}
-      >
-        Upload !
-      </button>
-      <div className={"spacer"} />
-      {boardData && (
+      {!tokenValid && <h1>Wrong token id</h1>}
+      {tokenValid && (
         <Fragment>
-          <GameBoard
-            createMode={true}
-            target={boardData.target}
-            scrambled={boardData.scrambled}
-          />
+          <div className="links-container">
+            {gameId && (
+              <a href={`/manage?game=${gameId}`} target="_blank">
+                Manage game: {gameId}
+              </a>
+            )}
+            {gameId && (
+              <a href={`/play?game=${gameId}`} target="_blank">
+                Play game {gameId}
+              </a>
+            )}
+          </div>
+          {/*{gameId && <Redirect to={`/manage/?game=${gameId}`} />}*/}
+          <h2 className={"h2 title"}>Create A New Game</h2>
+          <button className={"player-button"} onClick={generate}>
+            {`Generate ${difficulty.name} Game`}
+          </button>
+          <button
+            disabled={!boardData}
+            className={"player-button upload-button"}
+            onClick={upload}
+          >
+            Upload !
+          </button>
+          <div className={"spacer"} />
+          {boardData && (
+            <Fragment>
+              <GameBoard
+                createMode={true}
+                target={boardData.target}
+                scrambled={boardData.scrambled}
+              />
+            </Fragment>
+          )}
         </Fragment>
       )}
     </Fragment>

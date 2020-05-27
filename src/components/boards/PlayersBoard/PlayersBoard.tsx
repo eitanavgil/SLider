@@ -13,12 +13,11 @@ function PlayersBoard(props: playersBoardProps) {
   return (
     <Fragment>
       <div className="players-table">
-        {console.log(">>>> ss", props.players)}
         {props.players &&
           props.players &&
           props.players.length > 1 &&
           props.players.map((line: any, i: number) => {
-            if (i === 0) {
+            if (!line.name) {
               return null;
             }
             return (

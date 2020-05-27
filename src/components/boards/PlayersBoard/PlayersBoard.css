@@ -2,7 +2,6 @@
   padding-top: 24px;
   align-items: flex-start;
   flex-flow: row nowrap;
-  min-height: 300px;
 }
 .player-line {
   display: flex;
